@@ -21,12 +21,6 @@ const authStore = useAuthStore(pinia)
 
 netlifyIdentity.init()
 
-netlifyIdentity.on('init', (user) => {
-  authStore.setUser(user)
-  // Montamos la aplicación Vue SOLO DESPUÉS de que Netlify Identity se haya inicializado.
-  app.mount('#app')
-})
-
 netlifyIdentity.on('login', (user) => {
   authStore.setUser(user)
   netlifyIdentity.close()
@@ -35,4 +29,11 @@ netlifyIdentity.on('login', (user) => {
 netlifyIdentity.on('logout', () => {
   authStore.setUser(null)
 })
+
+// Inicializa el estado del usuario con el usuario actual de Netlify Identity.
+// Esto puede ser 'null' si nadie ha iniciado sesión.
+authStore.setUser(netlifyIdentity.currentUser())
+
+// Monta la aplicación inmediatamente.
+app.mount('#app')
 // --- FIN DE LÓGICA ---
