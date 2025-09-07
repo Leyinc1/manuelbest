@@ -17,62 +17,79 @@ h1 {
 }
 
 /* --- ESTILOS DEL SELECTOR DE PROYECTOS --- */
-.header-container {
-  max-width: 1200px; /* Aumentado para dar espacio a las nuevas columnas */
-  margin: 0 auto 40px auto;
-  text-align: center;
-}
-
 .project-selector {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 15px;
-  margin-top: 20px;
-  flex-wrap: wrap; /* Para que los botones se ajusten en pantallas pequeñas */
+  margin-bottom: 20px; /* Añadido para separar del tablero */
+  flex-wrap: wrap;
 }
 
-#project-dropdown {
+.project-selector select {
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
   padding: 10px 15px;
   border: 1px solid #ced4da;
   border-radius: 8px;
-  min-width: 200px;
+  min-width: 250px; /* Ancho aumentado */
 }
 
-#new-project-btn,
-#share-project-btn,
-#delete-project-btn {
+/* === Button Styles === */
+.btn {
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
   font-weight: 500;
-  padding: 10px 20px;
+  padding: 11px 20px;
   border-radius: 8px;
   border: none;
   color: white;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-#new-project-btn {
-  background-color: #2a9d8f;
-}
-#new-project-btn:hover {
-  background-color: #268a7f;
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-#share-project-btn {
-  background-color: #0077b6;
+.btn:disabled {
+  background-color: #adb5bd;
+  color: #f8f9fa;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
-#share-project-btn:hover {
+
+.btn-primary {
+  background-color: #0077b6; /* Blue */
+}
+.btn-primary:hover:not(:disabled) {
   background-color: #005f9c;
 }
 
-#delete-project-btn {
-  background-color: #e63946;
+.btn-secondary {
+  background-color: #6c757d; /* Gray */
 }
-#delete-project-btn:hover {
+.btn-secondary:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.btn-success {
+  background-color: #2a9d8f; /* Green */
+}
+.btn-success:hover:not(:disabled) {
+  background-color: #268a7f;
+}
+
+.btn-danger {
+  background-color: #e63946; /* Red */
+}
+.btn-danger:hover:not(:disabled) {
   background-color: #c12c38;
 }
 

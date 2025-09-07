@@ -12,16 +12,16 @@
         {{ project.name }}
       </option>
     </select>
-    <button id="new-project-btn" @click="kanbanStore.createProject">Proyecto Nuevo</button>
+    <button class="btn btn-success" @click="kanbanStore.createProject">Proyecto Nuevo</button>
     <button
-      id="delete-project-btn"
+      class="btn btn-danger"
       :disabled="!kanbanStore.currentProjectId"
       @click="kanbanStore.deleteProject"
     >
       Eliminar
     </button>
     <button
-      id="share-project-btn"
+      class="btn btn-primary"
       :disabled="!kanbanStore.currentProjectId"
       @click="kanbanStore.shareProject"
     >

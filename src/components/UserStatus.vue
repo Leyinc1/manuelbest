@@ -1,12 +1,12 @@
 <template>
   <div class="user-status">
-    <div v-if="authStore.user">
-      <p>Bienvenido, {{ authStore.user.email }}</p>
-      <button @click="authStore.logout()">Cerrar Sesión</button>
+    <div v-if="authStore.user" class="user-info">
+      <span>Bienvenido, {{ authStore.user.email }}</span>
+      <button class="btn btn-secondary" @click="authStore.logout()">Cerrar Sesión</button>
     </div>
-    <div v-else>
-      <button @click="authStore.login()">Iniciar Sesión</button>
-      <button @click="authStore.signup()">Registrarse</button>
+    <div v-else class="login-actions">
+      <button class="btn btn-primary" @click="authStore.login()">Iniciar Sesión</button>
+      <button class="btn btn-secondary" @click="authStore.signup()">Registrarse</button>
     </div>
   </div>
 </template>
@@ -17,16 +17,20 @@ const authStore = useAuthStore()
 </script>
 
 <style scoped>
-/* Estilos rápidos, ajústalos como quieras */
 .user-status {
   text-align: center;
   padding: 10px 0;
 }
-p {
-  font-size: 0.8em;
-  margin-bottom: 10px;
+
+.user-info, .login-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
 }
-button {
-  margin: 0 5px;
+
+.user-info span {
+    font-weight: 500;
 }
+
 </style>
