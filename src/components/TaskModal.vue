@@ -25,7 +25,7 @@
 
         <div class="form-group">
           <label>Etiquetas</label>
-          <div id="task-tags-container">
+          <div class="tags-checkbox-container">
             <div v-for="tag in kanbanStore.availableTags" :key="tag" class="tag-checkbox">
               <input type="checkbox" :id="`tag-${tag}`" :value="tag" v-model="formData.tags" />
               <label :for="`tag-${tag}`">{{ tag }}</label>
