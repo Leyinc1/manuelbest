@@ -29,22 +29,4 @@ import { RouterLink } from 'vue-router'
 import UserStatus from './UserStatus.vue'
 </script>
 
-<style scoped>
-/* Aquí irán los estilos específicos de la barra lateral */
-.sidebar {
-  width: 280px;
-  /* ... más estilos ... */
-}
-.nav-button {
-  display: block;
-  padding: 10px 15px;
-  margin: 5px 0;
-  text-decoration: none;
-  color: #333;
-  border-radius: 5px;
-}
-.router-link-active {
-  background-color: #007bff;
-  color: white;
-}
-</style>
+

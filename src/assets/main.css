@@ -4,7 +4,6 @@ body {
   background-color: #f8f9fa; /* Un blanco un poco más cálido */
   color: #343a40;
   margin: 0;
-  padding: 20px;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
