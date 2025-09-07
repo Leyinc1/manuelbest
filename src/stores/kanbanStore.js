@@ -47,16 +47,27 @@ export const useKanbanStore = defineStore('kanban', () => {
 
   // --- GETTERS ---
   const tasksByStatus = computed(() => {
-    // CORRECCIÓN CLAVE: Las tareas en el ref `tasks` YA SON las del proyecto actual.
-    // No necesitamos un segundo filtro aquí.
-    return {
-      requerimientos: tasks.value.filter((t) => t.status === 'requerimientos'),
-      todo: tasks.value.filter((t) => t.status === 'todo'),
-      'in-progress': tasks.value.filter((t) => t.status === 'in-progress'),
-      testing: tasks.value.filter((t) => t.status === 'testing'),
-      done: tasks.value.filter((t) => t.status === 'done'),
-    }
-  })
+    const categorizedTasks = {
+      requerimientos: [],
+      todo: [],
+      'in-progress': [],
+      testing: [],
+      done: [],
+    };
+
+    tasks.value.forEach(task => {
+      const status = task.status || 'todo'; // Si el estado es nulo o indefinido, se asigna a 'todo'
+      if (categorizedTasks[status]) {
+        categorizedTasks[status].push(task);
+      } else {
+        // Opcional: manejar estados inesperados si es necesario
+        console.warn(`Tarea con estado inesperado: ${status}`, task);
+        categorizedTasks.todo.push(task); // O ponerla en una columna por defecto
+      }
+    });
+
+    return categorizedTasks;
+  });
 
   const selectedProjectName = computed(() => {
     const project = projects.value.find((p) => p.id === currentProjectId.value)
