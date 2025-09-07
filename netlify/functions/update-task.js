@@ -22,7 +22,11 @@ exports.handler = async (event) => {
         if (assigned_to !== undefined) { values.push(assigned_to); setClauses.push(`assigned_to = ${values.length}`); }
         if (description !== undefined) { values.push(description); setClauses.push(`description = $${values.length}`); }
         // Añadimos el nuevo campo de etiquetas
-        if (tags !== undefined) { values.push(tags); setClauses.push(`tags = $${values.length}`); }
+        if (tags !== undefined) {
+            // Stringify the tags array for database storage
+            values.push(JSON.stringify(tags));
+            setClauses.push(`tags = ${values.length}`);
+        }
 
         if (setClauses.length === 0) {
             return { statusCode: 400, body: 'No fields to update' };
