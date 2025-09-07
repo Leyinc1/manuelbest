@@ -1,28 +1,21 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useAuthStore } from './authStore' // <-- IMPORTANTE: Traemos el store de autenticación
+import { useAuthStore } from './authStore'
 
-// Esta función ahora es inteligente: PIDE EL TOKEN al authStore
-const getAuthHeaders = () => {
+// El helper para la API se mantiene igual, ya está preparado
+const apiCall = async (endpoint, options = {}) => {
   const authStore = useAuthStore()
   const user = authStore.user
+  if (!user || !user.token) return null
 
-  if (!user || !user.token) {
-    return {}
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${user.token.access_token}`,
+    ...options.headers,
   }
 
-  return { Authorization: `Bearer ${user.token.access_token}` }
-}
-
-// El resto de la función es igual, pero ahora usará los headers correctos
-const apiCall = async (endpoint, options = {}) => {
-  const headers = { 'Content-Type': 'application/json', ...getAuthHeaders(), ...options.headers }
   try {
     const response = await fetch(endpoint, { ...options, headers })
-    if (response.status === 401) {
-      console.error('API call no autorizada. El usuario no está logueado o el token es inválido.')
-      return null
-    }
     if (!response.ok) {
       const errorData = await response.json()
       throw new Error(errorData.error || `Error ${response.status}`)
@@ -43,37 +36,61 @@ export const useKanbanStore = defineStore('kanban', () => {
   const projects = ref([])
   const tasks = ref([])
   const currentProjectId = ref(null)
+  let pollingIntervalId = null
 
-  // --- GETTERS ---
+  // NUEVO: Estado para manejar el modal
+  const isModalOpen = ref(false)
+  const isEditing = ref(false)
+  const editingTask = ref(null) // Contendrá la tarea a editar o los datos para una nueva
+
+  // NUEVO: Constantes del script original
+  const availableTags = ref(['Bug', 'Mejora', 'Urgente', 'Marketing', 'Diseño'])
+
+  // --- GETTERS (se mantienen igual) ---
   const tasksByStatus = computed(() => {
+    const tasksInProject = tasks.value.filter((task) => task.project_id === currentProjectId.value)
     return {
-      todo: tasks.value.filter((t) => t.status === 'todo'),
-      'in-progress': tasks.value.filter((t) => t.status === 'in-progress'),
-      done: tasks.value.filter((t) => t.status === 'done'),
+      todo: tasksInProject.filter((t) => t.status === 'todo'),
+      'in-progress': tasksInProject.filter((t) => t.status === 'in-progress'),
+      done: tasksInProject.filter((t) => t.status === 'done'),
     }
   })
 
   // --- ACTIONS ---
-  // IMPORTANTE: Esta acción ahora revisa si estás logueado ANTES de buscar proyectos
+
+  // MODIFICADO: fetchTasks ahora solo obtiene tareas del proyecto actual
+  async function fetchTasks() {
+    if (!currentProjectId.value) return
+    const fetchedTasks = await apiCall(
+      `/.netlify/functions/get-tasks?projectId=${currentProjectId.value}`,
+    )
+    if (fetchedTasks) {
+      tasks.value = fetchedTasks
+    }
+  }
+
+  // MODIFICADO: fetchProjects ahora inicia el polling
   async function fetchProjects() {
     const authStore = useAuthStore()
     if (!authStore.user) {
-      // Si no hay usuario, se limpia todo y no se hace nada más.
       projects.value = []
       tasks.value = []
       currentProjectId.value = null
       return
     }
-
     projects.value = (await apiCall('/.netlify/functions/get-projects')) || []
     if (projects.value.length > 0) {
       if (!currentProjectId.value || !projects.value.find((p) => p.id === currentProjectId.value)) {
         await selectProject(projects.value[0].id)
+      } else {
+        // Si ya había uno seleccionado, solo recargamos las tareas
+        await fetchTasks()
       }
     } else {
       tasks.value = []
       currentProjectId.value = null
     }
+    startPolling() // Inicia la auto-actualización
   }
 
   async function selectProject(projectId) {
@@ -81,37 +98,111 @@ export const useKanbanStore = defineStore('kanban', () => {
     await fetchTasks()
   }
 
-  async function fetchTasks() {
-    if (!currentProjectId.value) {
-      tasks.value = []
-      return
+  // --- NUEVO: Acciones completas para Tareas (CRUD) ---
+  async function createTask(taskData) {
+    const payload = {
+      ...taskData,
+      projectId: currentProjectId.value,
     }
-    const result = await apiCall(
-      `/.netlify/functions/get-tasks?projectId=${currentProjectId.value}`,
-    )
-    tasks.value = result || []
+    const newTask = await apiCall('/.netlify/functions/create-task', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+    if (newTask) {
+      tasks.value.push(newTask) // Actualización optimista
+    }
   }
 
-  async function updateTaskStatus(taskId, newStatus) {
-    const task = tasks.value.find((t) => t.id === taskId)
-    if (task) {
-      task.status = newStatus
-    }
-
-    await apiCall('/.netlify/functions/update-task', {
+  async function updateTask(taskData) {
+    const result = await apiCall('/.netlify/functions/update-task', {
       method: 'PUT',
-      body: JSON.stringify({ id: taskId, status: newStatus }),
+      body: JSON.stringify(taskData),
     })
+    if (result) {
+      const index = tasks.value.findIndex((t) => t.id === taskData.id)
+      if (index !== -1) {
+        tasks.value[index] = { ...tasks.value[index], ...taskData } // Actualización optimista
+      }
+    }
+  }
+
+  async function deleteTask(taskId) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+      const result = await apiCall(`/.netlify/functions/delete-task?id=${taskId}`, {
+        method: 'DELETE',
+      })
+      if (result) {
+        tasks.value = tasks.value.filter((t) => t.id !== taskId) // Actualización optimista
+      }
+    }
+  }
+
+  // --- NUEVO: Acciones para el Modal ---
+  function openModalForNew(status) {
+    isEditing.value = false
+    editingTask.value = {
+      content: '',
+      description: '',
+      assigned_to: '',
+      tags: [],
+      status: status, // El estado de la columna donde se hizo clic
+    }
+    isModalOpen.value = true
+  }
+
+  function openModalForEdit(task) {
+    isEditing.value = true
+    // Clonamos la tarea para no modificar la original directamente hasta guardar
+    editingTask.value = JSON.parse(JSON.stringify(task))
+    isModalOpen.value = true
+  }
+
+  function closeModal() {
+    isModalOpen.value = false
+    editingTask.value = null
+  }
+
+  // --- NUEVO: Polling ---
+  function startPolling() {
+    stopPolling() // Asegurarse de que no hay otro intervalo corriendo
+    pollingIntervalId = setInterval(async () => {
+      if (!currentProjectId.value) return
+      const latestTasks = await apiCall(
+        `/.netlify/functions/get-tasks?projectId=${currentProjectId.value}`,
+      )
+      // Comparamos si los datos han cambiado para evitar re-renderizados innecesarios
+      if (latestTasks && JSON.stringify(latestTasks) !== JSON.stringify(tasks.value)) {
+        console.log('Cambios detectados, actualizando tablero...')
+        tasks.value = latestTasks
+      }
+    }, 10000) // Consulta cada 10 segundos
+  }
+
+  function stopPolling() {
+    if (pollingIntervalId) {
+      clearInterval(pollingIntervalId)
+      pollingIntervalId = null
+    }
   }
 
   return {
     projects,
     tasks,
     currentProjectId,
+    isModalOpen,
+    isEditing,
+    editingTask,
+    availableTags,
     tasksByStatus,
     fetchProjects,
     selectProject,
-    fetchTasks,
-    updateTaskStatus,
+    createTask,
+    updateTask,
+    deleteTask,
+    openModalForNew,
+    openModalForEdit,
+    closeModal,
+    startPolling,
+    stopPolling,
   }
 })

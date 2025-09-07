@@ -16,6 +16,7 @@
         <h2>Bienvenido a tu Tablero Kanban</h2>
         <p>Parece que no tienes ningún proyecto. ¡Crea uno para empezar a organizar tus tareas!</p>
       </div>
+      <TaskModal />
     </div>
 
     <div v-else class="no-projects">
@@ -31,6 +32,7 @@ import { useKanbanStore } from '@/stores/kanbanStore'
 import { useAuthStore } from '@/stores/authStore'
 import ProjectSelector from '@/components/ProjectSelector.vue'
 import KanbanColumn from '@/components/KanbanColumn.vue'
+import TaskModal from '@/components/TaskModal.vue'
 
 const kanbanStore = useKanbanStore()
 const authStore = useAuthStore()
