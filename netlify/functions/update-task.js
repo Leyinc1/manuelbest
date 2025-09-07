@@ -38,9 +38,10 @@ exports.handler = async (event) => {
             body: JSON.stringify({ message: 'Task updated successfully' }),
         };
     } catch (error) {
+        console.error('Error en update-task:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to update task' }),
+            body: JSON.stringify({ error: 'Failed to update task', details: error.message }),
         };
     }
 };
