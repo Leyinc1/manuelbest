@@ -67,6 +67,7 @@ watch(
   flex-direction: column;
   flex-grow: 1;
   overflow: hidden;
+  padding: 40px;
 }
 
 .kanban-board {
@@ -74,9 +75,7 @@ watch(
   gap: 20px;
   flex-grow: 1;
   padding: 20px 0;
-  flex-wrap: wrap;
-  overflow-y: auto;
-  align-content: flex-start;
+  overflow-x: auto;
 }
 
 .no-projects {

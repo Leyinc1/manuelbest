@@ -137,7 +137,6 @@ hr {
 /* --- CONTENIDO PRINCIPAL --- */
 .main-content {
   margin-left: 320px;
-  padding: 40px;
   width: calc(100% - 320px);
   display: flex;
   flex-direction: column;
