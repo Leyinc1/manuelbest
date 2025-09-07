@@ -5,20 +5,24 @@ import { useAuthStore } from './authStore'
 const apiCall = async (endpoint, options = {}) => {
   const authStore = useAuthStore()
   const user = authStore.user
-  if (!user || !user.token) return null
+  if (!user || !user.token) {
+    console.error('API call abortada: Usuario no autenticado o token no disponible.')
+    return null
+  }
 
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${user.token.access_token}`,
     ...options.headers,
   }
+
   try {
     const response = await fetch(endpoint, { ...options, headers })
     if (!response.ok) {
       const errorData = await response.json()
       throw new Error(errorData.error || `Error ${response.status}`)
     }
-    if (response.status === 204 || response.headers.get('content-length') === '0') {
+    if (response.status === 204) {
       return { success: true }
     }
     return await response.json()
@@ -30,7 +34,7 @@ const apiCall = async (endpoint, options = {}) => {
 }
 
 export const useKanbanStore = defineStore('kanban', () => {
-  // STATE
+  // --- STATE ---
   const projects = ref([])
   const tasks = ref([])
   const currentProjectId = ref(null)
@@ -41,43 +45,50 @@ export const useKanbanStore = defineStore('kanban', () => {
   const availableTags = ref(['Bug', 'Mejora', 'Urgente', 'Marketing', 'Diseño'])
   const DELETE_PASSWORD = '0846'
 
-  // GETTERS
+  // --- GETTERS ---
   const tasksByStatus = computed(() => {
-    const tasksInProject = tasks.value.filter((task) => task.project_id === currentProjectId.value)
+    // CORRECCIÓN CLAVE: Las tareas en el ref `tasks` YA SON las del proyecto actual.
+    // No necesitamos un segundo filtro aquí.
     return {
-      todo: tasksInProject.filter((t) => t.status === 'todo'),
-      'in-progress': tasksInProject.filter((t) => t.status === 'in-progress'),
-      done: tasksInProject.filter((t) => t.status === 'done'),
+      todo: tasks.value.filter((t) => t.status === 'todo'),
+      'in-progress': tasks.value.filter((t) => t.status === 'in-progress'),
+      done: tasks.value.filter((t) => t.status === 'done'),
     }
   })
+
   const selectedProjectName = computed(() => {
     const project = projects.value.find((p) => p.id === currentProjectId.value)
     return project ? project.name : ''
   })
 
-  // ACTIONS
+  // --- ACTIONS ---
   async function fetchTasks() {
     if (!currentProjectId.value) return
     const fetchedTasks = await apiCall(
       `/.netlify/functions/get-tasks?projectId=${currentProjectId.value}`,
     )
-    if (fetchedTasks) tasks.value = fetchedTasks
+    if (fetchedTasks) {
+      tasks.value = fetchedTasks
+    }
   }
 
   async function fetchProjects() {
     const authStore = useAuthStore()
-    if (!authStore.user) {
+    if (!authStore.user?.token) {
       projects.value = []
       tasks.value = []
       currentProjectId.value = null
+      stopPolling()
       return
     }
+
     const fetchedProjects = (await apiCall('/.netlify/functions/get-projects')) || []
     projects.value = fetchedProjects
+
     if (fetchedProjects.length > 0) {
       if (
         !currentProjectId.value ||
-        !fetchedProjects.find((p) => p.id === currentProjectId.value)
+        !fetchedProjects.some((p) => p.id === currentProjectId.value)
       ) {
         await selectProject(fetchedProjects[0].id)
       } else {
@@ -105,12 +116,14 @@ export const useKanbanStore = defineStore('kanban', () => {
   }
 
   async function updateTask(taskData) {
-    await apiCall('/.netlify/functions/update-task', {
+    const result = await apiCall('/.netlify/functions/update-task', {
       method: 'PUT',
       body: JSON.stringify(taskData),
     })
-    // La actualización visual se hará por polling o se puede hacer optimista aquí
-    await fetchTasks()
+    if (result) {
+      const index = tasks.value.findIndex((t) => t.id === taskData.id)
+      if (index !== -1) tasks.value[index] = { ...tasks.value[index], ...taskData }
+    }
   }
 
   async function deleteTask(taskId) {
@@ -122,17 +135,16 @@ export const useKanbanStore = defineStore('kanban', () => {
     }
   }
 
-  // --- NUEVAS ACCIONES PARA PROYECTOS ---
   async function createProject() {
     const projectName = prompt('Nombre del nuevo proyecto:')
-    if (projectName && projectName.trim()) {
+    if (projectName?.trim()) {
       const newProject = await apiCall('/.netlify/functions/create-project', {
         method: 'POST',
         body: JSON.stringify({ name: projectName.trim() }),
       })
       if (newProject) {
-        await fetchProjects() // Recarga la lista de proyectos
-        await selectProject(newProject.id) // Selecciona el nuevo proyecto
+        projects.value.push(newProject)
+        await selectProject(newProject.id)
       }
     }
   }
@@ -144,15 +156,13 @@ export const useKanbanStore = defineStore('kanban', () => {
     )
     if (password === DELETE_PASSWORD) {
       if (
-        confirm(
-          `¿Estás SEGURO de que quieres eliminar el proyecto "${selectedProjectName.value}" y TODAS sus tareas?`,
-        )
+        confirm(`¿SEGURO que quieres eliminar "${selectedProjectName.value}" y TODAS sus tareas?`)
       ) {
         await apiCall(`/.netlify/functions/delete-project?id=${currentProjectId.value}`, {
           method: 'DELETE',
         })
-        currentProjectId.value = null // Deseleccionar
-        await fetchProjects() // Recargar proyectos
+        currentProjectId.value = null
+        await fetchProjects()
       }
     } else if (password !== null) {
       alert('Contraseña incorrecta.')
@@ -162,7 +172,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   async function shareProject() {
     if (!currentProjectId.value) return
     const email = prompt('Introduce el email del usuario a invitar (debe estar registrado):')
-    if (email && email.trim()) {
+    if (email?.trim()) {
       const result = await apiCall('/.netlify/functions/add-project-member', {
         method: 'POST',
         body: JSON.stringify({ projectId: currentProjectId.value, newUserEmail: email.trim() }),
@@ -171,35 +181,32 @@ export const useKanbanStore = defineStore('kanban', () => {
     }
   }
 
-  // --- Acciones del Modal ---
   function openModalForNew(status) {
     isEditing.value = false
     editingTask.value = { content: '', description: '', assigned_to: '', tags: [], status }
     isModalOpen.value = true
   }
+
   function openModalForEdit(task) {
     isEditing.value = true
     editingTask.value = JSON.parse(JSON.stringify(task))
     isModalOpen.value = true
   }
+
   function closeModal() {
     isModalOpen.value = false
     editingTask.value = null
   }
 
-  // --- Polling ---
   function startPolling() {
     stopPolling()
-    pollingIntervalId = setInterval(async () => {
-      if (!currentProjectId.value || !useAuthStore().user) return
-      const latestTasks = await apiCall(
-        `/.netlify/functions/get-tasks?projectId=${currentProjectId.value}`,
-      )
-      if (latestTasks && JSON.stringify(latestTasks) !== JSON.stringify(tasks.value)) {
-        tasks.value = latestTasks
+    pollingIntervalId = setInterval(() => {
+      if (currentProjectId.value && useAuthStore().user) {
+        fetchTasks()
       }
     }, 10000)
   }
+
   function stopPolling() {
     if (pollingIntervalId) clearInterval(pollingIntervalId)
   }
@@ -224,7 +231,5 @@ export const useKanbanStore = defineStore('kanban', () => {
     createProject,
     deleteProject,
     shareProject,
-    startPolling,
-    stopPolling,
   }
 })
