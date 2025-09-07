@@ -13,6 +13,8 @@
         <RouterLink to="/intereses" class="nav-button">Intereses</RouterLink>
       </nav>
       <hr />
+      <UserStatus />
+      <hr />
       <div class="contact-info">
         <h2>Contacto</h2>
         <p><a href="mailto:manuelipenza@manuel.best">manuelipenza@manuel.best</a></p>
@@ -24,6 +26,7 @@
 
 <script setup>
 import { RouterLink } from 'vue-router'
+import UserStatus from './UserStatus.vue'
 </script>
 
 <style scoped>

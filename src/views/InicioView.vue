@@ -3,7 +3,7 @@
     <h2>Inicio / Páginas de Interés</h2>
     <ul class="link-list">
       <li class="indice">
-        <a href="/Kanban" target="_blank">Tablero Kanban</a> - Ultima versión del tablero Kanban de
+        <RouterLink to="/kanban">Tablero Kanban</RouterLink> - Ultima versión del tablero Kanban de
         Manuel.Best
       </li>
       <li class="texto-pequeño">
@@ -14,8 +14,9 @@
         Actualmente en la versión 6.0, ya no es necesario recargar la pagina para ver los cambios.
       </li>
       <li class="texto-pequeño">Click en el boton de "?" para ver tutorial.</li>
+
       <li class="indice">
-        <a href="/Calendario" target="_blank">Horario Interactivo</a> - Ultima versión del
+        <RouterLink to="/calendario">Horario Interactivo</RouterLink> - Ultima versión del
         calendario Drag and Drop de Manuel.Best
       </li>
       <li class="texto-pequeño">
@@ -27,3 +28,8 @@
     </ul>
   </section>
 </template>
+
+<script setup>
+// Asegúrate de importar RouterLink si no lo hace automáticamente tu editor
+import { RouterLink } from 'vue-router'
+</script>
