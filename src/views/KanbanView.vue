@@ -17,6 +17,7 @@
         <p>Parece que no tienes ningún proyecto. ¡Crea uno para empezar a organizar tus tareas!</p>
       </div>
       <TaskModal />
+      <TutorialModal v-if="showTutorial" @close="showTutorial = false" />
     </div>
 
     <div v-else class="no-projects">
@@ -27,15 +28,16 @@
 </template>
 
 <script setup>
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useKanbanStore } from '@/stores/kanbanStore'
 import { useAuthStore } from '@/stores/authStore'
 import ProjectSelector from '@/components/ProjectSelector.vue'
 import KanbanColumn from '@/components/KanbanColumn.vue'
 import TaskModal from '@/components/TaskModal.vue'
-
+import TutorialModal from '@/components/TutorialModal.vue' // Importa el nuevo componente
 const kanbanStore = useKanbanStore()
 const authStore = useAuthStore()
+const showTutorial = ref(false)
 
 // Esta lógica se mantiene, es correcta.
 // "Observa" al usuario. Si cambia (login/logout), reacciona.

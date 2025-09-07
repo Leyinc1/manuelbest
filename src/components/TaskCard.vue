@@ -30,7 +30,8 @@
 <script setup>
 import { useKanbanStore } from '@/stores/kanbanStore'
 
-const props = defineProps({
+// Simplemente declaramos los props, sin asignarlos a una variable
+defineProps({
   task: {
     type: Object,
     required: true,
