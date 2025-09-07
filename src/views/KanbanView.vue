@@ -19,17 +19,31 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { watch } from 'vue'
 import { useKanbanStore } from '@/stores/kanbanStore'
+import { useAuthStore } from '@/stores/authStore'
 import ProjectSelector from '@/components/ProjectSelector.vue'
 import KanbanColumn from '@/components/KanbanColumn.vue'
 
-const store = useKanbanStore()
+const kanbanStore = useKanbanStore()
+const authStore = useAuthStore()
 
-onMounted(() => {
-  // Al cargar la página, buscamos los proyectos del usuario
-  store.fetchProjects()
-})
+// Esto "observa" al usuario. Si cambia (login/logout), ejecuta el código.
+watch(
+  () => authStore.user,
+  (newUser) => {
+    if (newUser) {
+      // Si hay un usuario, busca sus proyectos.
+      kanbanStore.fetchProjects()
+    } else {
+      // Si no hay usuario (cerró sesión), limpia el tablero.
+      kanbanStore.projects = []
+      kanbanStore.tasks = []
+      kanbanStore.currentProjectId = null
+    }
+  },
+  { immediate: true },
+) // immediate: true hace que se ejecute al cargar la página.
 </script>
 
 <style>

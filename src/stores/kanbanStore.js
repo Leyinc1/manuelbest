@@ -1,22 +1,28 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useAuthStore } from './authStore' // <-- IMPORTANTE: Traemos el store de autenticación
 
-// Opcional: Para simular la autenticación por ahora
+// Esta función ahora es inteligente: PIDE EL TOKEN al authStore
 const getAuthHeaders = () => {
-  // En un futuro, integraremos Netlify Identity aquí.
-  // Por ahora, asumimos que estamos logueados para las pruebas.
-  // Si tienes un token de prueba, puedes ponerlo aquí.
-  // const user = window.netlifyIdentity?.currentUser();
-  // if (!user) return {};
-  // return { Authorization: `Bearer ${user.token.access_token}` };
-  return {} // Sin headers por ahora para pruebas locales si el backend lo permite
+  const authStore = useAuthStore()
+  const user = authStore.user
+
+  if (!user || !user.token) {
+    return {}
+  }
+
+  return { Authorization: `Bearer ${user.token.access_token}` }
 }
 
-// Helper para centralizar las llamadas a la API
+// El resto de la función es igual, pero ahora usará los headers correctos
 const apiCall = async (endpoint, options = {}) => {
   const headers = { 'Content-Type': 'application/json', ...getAuthHeaders(), ...options.headers }
   try {
     const response = await fetch(endpoint, { ...options, headers })
+    if (response.status === 401) {
+      console.error('API call no autorizada. El usuario no está logueado o el token es inválido.')
+      return null
+    }
     if (!response.ok) {
       const errorData = await response.json()
       throw new Error(errorData.error || `Error ${response.status}`)
@@ -34,39 +40,37 @@ const apiCall = async (endpoint, options = {}) => {
 
 export const useKanbanStore = defineStore('kanban', () => {
   // --- STATE ---
-  // Reemplaza las variables globales del script original
   const projects = ref([])
   const tasks = ref([])
   const currentProjectId = ref(null)
 
   // --- GETTERS ---
-  // Equivalente a tener datos computados a partir del estado
-  const currentProjectTasks = computed(() => {
-    if (!currentProjectId.value) return []
-    // Filtramos las tareas para solo mostrar las del proyecto actual
-    // En el futuro, la API podría devolver solo las tareas necesarias
-    return tasks.value
-  })
-
   const tasksByStatus = computed(() => {
     return {
-      todo: currentProjectTasks.value.filter((t) => t.status === 'todo'),
-      'in-progress': currentProjectTasks.value.filter((t) => t.status === 'in-progress'),
-      done: currentProjectTasks.value.filter((t) => t.status === 'done'),
+      todo: tasks.value.filter((t) => t.status === 'todo'),
+      'in-progress': tasks.value.filter((t) => t.status === 'in-progress'),
+      done: tasks.value.filter((t) => t.status === 'done'),
     }
   })
 
   // --- ACTIONS ---
-  // Reemplaza las funciones de la API del script original
+  // IMPORTANTE: Esta acción ahora revisa si estás logueado ANTES de buscar proyectos
   async function fetchProjects() {
+    const authStore = useAuthStore()
+    if (!authStore.user) {
+      // Si no hay usuario, se limpia todo y no se hace nada más.
+      projects.value = []
+      tasks.value = []
+      currentProjectId.value = null
+      return
+    }
+
     projects.value = (await apiCall('/.netlify/functions/get-projects')) || []
     if (projects.value.length > 0) {
-      // Si no hay un proyecto seleccionado, seleccionamos el primero
       if (!currentProjectId.value || !projects.value.find((p) => p.id === currentProjectId.value)) {
         await selectProject(projects.value[0].id)
       }
     } else {
-      // Si no hay proyectos, limpiamos el tablero
       tasks.value = []
       currentProjectId.value = null
     }
@@ -89,28 +93,21 @@ export const useKanbanStore = defineStore('kanban', () => {
   }
 
   async function updateTaskStatus(taskId, newStatus) {
-    // Actualización optimista: movemos la tarjeta en la UI inmediatamente
     const task = tasks.value.find((t) => t.id === taskId)
     if (task) {
       task.status = newStatus
     }
 
-    // Y luego enviamos la actualización a la API en segundo plano
     await apiCall('/.netlify/functions/update-task', {
       method: 'PUT',
       body: JSON.stringify({ id: taskId, status: newStatus }),
     })
-    // No necesitamos recargar todo, la UI ya está actualizada.
-    // Opcional: podríamos volver a llamar a fetchTasks() si la API devuelve el objeto completo.
   }
-
-  // Aquí añadiremos el resto de acciones (createTask, deleteProject, etc.)
 
   return {
     projects,
     tasks,
     currentProjectId,
-    currentProjectTasks,
     tasksByStatus,
     fetchProjects,
     selectProject,
