@@ -50,8 +50,10 @@ export const useKanbanStore = defineStore('kanban', () => {
     // CORRECCIÓN CLAVE: Las tareas en el ref `tasks` YA SON las del proyecto actual.
     // No necesitamos un segundo filtro aquí.
     return {
+      requerimientos: tasks.value.filter((t) => t.status === 'requerimientos'),
       todo: tasks.value.filter((t) => t.status === 'todo'),
       'in-progress': tasks.value.filter((t) => t.status === 'in-progress'),
+      testing: tasks.value.filter((t) => t.status === 'testing'),
       done: tasks.value.filter((t) => t.status === 'done'),
     }
   })

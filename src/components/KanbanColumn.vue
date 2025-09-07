@@ -2,7 +2,6 @@
   <div class="column" :id="statusId">
     <div class="column-header" :class="`header-${statusId}`">
       <h3>{{ title }} ({{ tasks.length }})</h3>
-      <button class="add-task-btn" @click="kanbanStore.openModalForNew(statusId)">+</button>
     </div>
     <draggable
       class="card-container"
@@ -15,6 +14,7 @@
         <TaskCard :task="element" :status-id="statusId" />
       </template>
     </draggable>
+    <button class="add-task-btn" @click="kanbanStore.openModalForNew(statusId)">Añadir tarea</button>
   </div>
 </template>
 
@@ -58,18 +58,21 @@ const onDragChange = (event) => {
   color: #fff;
   border-radius: 12px 12px 0 0;
   text-align: center;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 /* Colores para cada cabecera */
+.header-requerimientos {
+  background-color: #6a0dad;
+} /* Púrpura */
 .header-todo {
   background-color: #0077b6;
 } /* Azul */
 .header-in-progress {
   background-color: #fca311;
 } /* Naranja */
+.header-testing {
+  background-color: #e63946;
+} /* Rojo */
 .header-done {
   background-color: #2a9d8f;
 } /* Verde */
@@ -80,24 +83,26 @@ const onDragChange = (event) => {
   flex-grow: 1;
 }
 
+/* --- BOTÓN PARA AÑADIR TAREAS --- */
 .add-task-btn {
+  width: calc(100% - 40px);
+  margin: 0 20px 20px;
+  padding: 12px;
   border: none;
-  background-color: rgba(255, 255, 255, 0.3);
-  color: #fff;
+  background-color: #e9ecef;
+  color: #495057;
   cursor: pointer;
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 500;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  line-height: 1;
-  transition: background-color 0.2s;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 8px;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .add-task-btn:hover {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: #ced4da;
+  color: #212529;
 }
 </style>

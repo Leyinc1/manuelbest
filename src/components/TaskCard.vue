@@ -66,11 +66,17 @@ const kanbanStore = useKanbanStore()
 }
 
 /* Colores del borde izquierdo según la columna */
+.border-requerimientos {
+  border-left-color: #6a0dad;
+}
 .border-todo {
   border-left-color: #0077b6;
 }
 .border-in-progress {
   border-left-color: #fca311;
+}
+.border-testing {
+  border-left-color: #e63946;
 }
 .border-done {
   border-left-color: #2a9d8f;
