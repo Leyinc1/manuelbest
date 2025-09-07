@@ -76,12 +76,21 @@ export const useKanbanStore = defineStore('kanban', () => {
 
   // --- ACTIONS ---
   async function fetchTasks() {
-    if (!currentProjectId.value) return
+    if (!currentProjectId.value) {
+      console.log('fetchTasks abortado: no hay currentProjectId.');
+      return;
+    }
+    console.log(`Fetching tasks for project: ${currentProjectId.value}`);
     const fetchedTasks = await apiCall(
       `/.netlify/functions/get-tasks?projectId=${currentProjectId.value}`,
-    )
-    if (fetchedTasks) {
-      tasks.value = fetchedTasks
+    );
+    if (fetchedTasks && fetchedTasks.length > 0) {
+      console.log('Tasks fetched successfully:', fetchedTasks);
+      tasks.value = fetchedTasks;
+    } else {
+      console.log('fetchTasks no devolvió tareas o la respuesta estaba vacía. La respuesta fue:', fetchedTasks);
+      // Si no hay tareas, nos aseguramos de que el array local esté vacío.
+      tasks.value = [];
     }
   }
 
