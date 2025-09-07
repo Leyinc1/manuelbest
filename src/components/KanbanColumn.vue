@@ -45,7 +45,7 @@ const onDragChange = (event) => {
   background-color: #f1f1f1; /* Un gris muy claro para el fondo de las tarjetas */
   border-radius: 12px;
   width: 300px; /* Ancho fijo para cada columna */
-  flex-shrink: 0; /* Evita que las columnas se encojan */
+  min-width: 250px; /* Ancho mínimo para la columna */
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);

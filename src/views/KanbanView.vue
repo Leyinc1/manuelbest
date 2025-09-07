@@ -75,7 +75,6 @@ watch(
   gap: 20px;
   flex-grow: 1;
   padding: 20px 0;
-  overflow-x: auto;
 }
 
 .no-projects {
