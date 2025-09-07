@@ -2,7 +2,7 @@
   <div class="column">
     <div class="column-header">
       <h3>{{ title }} ({{ tasks.length }})</h3>
-      <button class="add-task-btn" :data-column="statusId">+</button>
+      <button class="add-task-btn" @click="kanbanStore.openModalForNew(statusId)">+</button>
     </div>
     <draggable
       class="card-container"
@@ -19,6 +19,7 @@
 </template>
 
 <script setup>
+// El script de este archivo se mantiene igual, no es necesario cambiarlo
 import draggable from 'vuedraggable'
 import TaskCard from './TaskCard.vue'
 import { useKanbanStore } from '@/stores/kanbanStore'
@@ -29,13 +30,12 @@ const props = defineProps({
   tasks: Array,
 })
 
-const store = useKanbanStore()
+const kanbanStore = useKanbanStore()
 
 const onDragChange = (event) => {
   if (event.added) {
     const { element } = event.added
-    // La tarea fue movida a ESTA columna
-    store.updateTaskStatus(element.id, props.statusId)
+    kanbanStore.updateTaskStatus(element.id, props.statusId)
   }
 }
 </script>

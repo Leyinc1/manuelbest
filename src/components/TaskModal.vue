@@ -49,7 +49,6 @@ import { useKanbanStore } from '@/stores/kanbanStore'
 
 const kanbanStore = useKanbanStore()
 
-// Estado local para el formulario
 const formData = ref({
   id: null,
   content: '',
@@ -59,34 +58,35 @@ const formData = ref({
   status: '',
 })
 
-// 'watch' es una función de Vue que observa cambios.
-// Aquí, observamos la tarea que se está editando en el store.
 watch(
   () => kanbanStore.editingTask,
-  (newTask) => {
-    if (newTask) {
-      // Si hay una tarea para editar, llenamos el formulario
-      formData.value = { ...newTask }
-    } else {
-      // Si no, lo reseteamos
-      formData.value = {
-        id: null,
-        content: '',
-        description: '',
-        assigned_to: '',
-        tags: [],
-        status: '',
-      }
+  (task) => {
+    if (task) {
+      // Copia los datos de la tarea que el store nos pasa
+      formData.value = { ...task }
     }
+  },
+  {
+    deep: true, // Importante para observar cambios dentro del objeto
+    immediate: true,
   },
 )
 
 const saveTask = () => {
-  if (kanbanStore.isEditing) {
-    // Lógica para actualizar (la añadiremos al store después)
-  } else {
-    // Lógica para crear (la añadiremos al store después)
+  // Validamos que el título no esté vacío
+  if (!formData.value.content || !formData.value.content.trim()) {
+    alert('El título de la tarea no puede estar vacío.')
+    return
   }
+
+  if (kanbanStore.isEditing) {
+    // Si estamos editando, llamamos a la acción de actualizar
+    kanbanStore.updateTask(formData.value)
+  } else {
+    // Si estamos creando, llamamos a la acción de crear
+    kanbanStore.createTask(formData.value)
+  }
+  // Al terminar, cerramos el modal
   kanbanStore.closeModal()
 }
 </script>
