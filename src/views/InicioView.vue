@@ -47,9 +47,18 @@ const authStore = useAuthStore()
 const showTutorial = ref(false)
 
 watch(
-  () => authStore.user?.token,
-  (newToken) => {
-    kanbanStore.fetchProjects()
+  () => authStore.user,
+  (newUser) => {
+    // Si hay un nuevo usuario (acaba de iniciar sesión o ya estaba logueado al cargar la página)
+    // entonces, le pedimos al kanbanStore que cargue los proyectos.
+    if (newUser) {
+      kanbanStore.fetchProjects()
+    } else {
+      // Si el usuario cierra sesión (newUser es null), limpiamos el tablero.
+      kanbanStore.projects = []
+      kanbanStore.tasks = []
+      kanbanStore.currentProjectId = null
+    }
   },
   { immediate: true },
 )
