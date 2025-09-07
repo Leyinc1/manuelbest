@@ -63,20 +63,18 @@ watch(
 
 <style scoped>
 .kanban-view {
-  padding: 15px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  flex-grow: 1;
+  overflow: hidden;
 }
 
 .kanban-board {
   display: flex;
   gap: 20px;
   flex-grow: 1;
-  padding: 20px;
+  padding: 20px 0;
   overflow-x: auto;
-  justify-content: center;
 }
 
 .no-projects {

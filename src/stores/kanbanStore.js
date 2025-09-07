@@ -213,6 +213,28 @@ export const useKanbanStore = defineStore('kanban', () => {
     if (pollingIntervalId) clearInterval(pollingIntervalId)
   }
 
+  async function updateTaskStatus(taskId, newStatus) {
+    // Find the task in the local state
+    const taskIndex = tasks.value.findIndex(t => t.id === taskId);
+    if (taskIndex === -1) return;
+
+    // Optimistically update the local state
+    const oldStatus = tasks.value[taskIndex].status;
+    tasks.value[taskIndex].status = newStatus;
+
+    // Make the API call to update the backend
+    const result = await apiCall('/.netlify/functions/update-task', {
+      method: 'PUT',
+      body: JSON.stringify({ id: taskId, status: newStatus }),
+    });
+
+    // If the API call fails, revert the change
+    if (!result) {
+      tasks.value[taskIndex].status = oldStatus;
+      alert('Error: No se pudo actualizar la tarea. Por favor, inténtalo de nuevo.');
+    }
+  }
+
   return {
     projects,
     tasks,
@@ -233,5 +255,6 @@ export const useKanbanStore = defineStore('kanban', () => {
     createProject,
     deleteProject,
     shareProject,
+    updateTaskStatus,
   }
 })
