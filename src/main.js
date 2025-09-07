@@ -12,25 +12,27 @@ import { useAuthStore } from '@/stores/authStore'
 
 const app = createApp(App)
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
+app.use(router)
 
 // --- LÓGICA DE IDENTITY ---
-// Inicializamos Pinia para poder usar el store aquí mismo
-const pinia = app.config.globalProperties.$pinia || createPinia()
 const authStore = useAuthStore(pinia)
 
 netlifyIdentity.init()
+
 netlifyIdentity.on('init', (user) => {
   authStore.setUser(user)
+  // Montamos la aplicación Vue SOLO DESPUÉS de que Netlify Identity se haya inicializado.
+  app.mount('#app')
 })
+
 netlifyIdentity.on('login', (user) => {
   authStore.setUser(user)
   netlifyIdentity.close()
 })
+
 netlifyIdentity.on('logout', () => {
   authStore.setUser(null)
 })
 // --- FIN DE LÓGICA ---
-
-app.use(router)
-app.mount('#app')
