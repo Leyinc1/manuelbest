@@ -1,5 +1,5 @@
 <template>
-  <section id="inicio" class="card content-section active">
+  <section id="inicio" class="view-card content-section active">
     <h2>Inicio / Páginas de Interés</h2>
     <ul class="link-list">
       <li class="indice">

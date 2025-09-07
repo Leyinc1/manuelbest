@@ -1,5 +1,5 @@
 <template>
-  <section id="tecnologias" class="card content-section active">
+  <section id="tecnologias" class="view-card content-section active">
     <h2>Tecnologías de Interés</h2>
     <ul class="tech-list">
       <li>HTML5</li>

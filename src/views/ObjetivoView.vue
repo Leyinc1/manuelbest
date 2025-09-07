@@ -1,5 +1,5 @@
 <template>
-  <section id="objetivo" class="card content-section active">
+  <section id="objetivo" class="view-card content-section active">
     <h2>Objetivo Profesional</h2>
     <p>
       Busco consolidar mi carrera como Desarrollador Full-Stack, participando en proyectos

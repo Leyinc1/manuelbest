@@ -151,7 +151,7 @@ hr {
 }
 
 /* --- TARJETAS DE CONTENIDO (Cards) --- */
-.card {
+.view-card {
   background-color: var(--card-bg);
   padding: 30px;
   border-radius: 8px;
@@ -163,7 +163,7 @@ hr {
 }
 
 /* La clase 'active' hace visible la tarjeta y le añade la animación */
-.card.active {
+.view-card.active {
   display: block;
   animation: fadeIn 0.5s ease-out forwards;
 }
