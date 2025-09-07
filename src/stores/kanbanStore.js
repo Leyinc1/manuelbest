@@ -149,11 +149,21 @@ export const useKanbanStore = defineStore('kanban', () => {
   }
 
   async function deleteTask(taskId) {
+    console.log(`Intentando eliminar la tarea con ID: ${taskId}`);
     if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+      console.log('Usuario confirmó la eliminación.');
       const result = await apiCall(`/.netlify/functions/delete-task?id=${taskId}`, {
         method: 'DELETE',
-      })
-      if (result) tasks.value = tasks.value.filter((t) => t.id !== taskId)
+      });
+      console.log('Resultado de la API de eliminación:', result);
+      if (result) {
+        tasks.value = tasks.value.filter((t) => t.id !== taskId);
+        console.log('Tarea eliminada del estado local.');
+      } else {
+        console.error('La eliminación de la tarea falló. La API no devolvió un resultado exitoso.');
+      }
+    } else {
+      console.log('Usuario canceló la eliminación.');
     }
   }
 
