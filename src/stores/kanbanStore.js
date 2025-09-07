@@ -20,7 +20,10 @@ const apiCall = async (endpoint, options = {}) => {
     const response = await fetch(endpoint, { ...options, headers })
     if (!response.ok) {
       const errorData = await response.json()
-      throw new Error(errorData.error || `Error ${response.status}`)
+      // Include details if available
+      const errorMessage = errorData.error || `Error ${response.status}`
+      const errorDetails = errorData.details ? `: ${errorData.details}` : ''
+      throw new Error(errorMessage + errorDetails)
     }
     if (response.status === 204) {
       return { success: true }
