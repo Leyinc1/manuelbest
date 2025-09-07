@@ -11,15 +11,15 @@ exports.handler = async (event) => {
     }
 
     try {
-        const { id, status, content, assignedTo, description, tags } = JSON.parse(event.body);
+        const { id, status, content, assigned_to, description, tags } = JSON.parse(event.body);
 
         let query = 'UPDATE tasks SET ';
         const values = [];
         let setClauses = [];
 
-        if (status) { values.push(status); setClauses.push(`status = $${values.length}`); }
-        if (content) { values.push(content); setClauses.push(`content = $${values.length}`); }
-        if (assignedTo !== undefined) { values.push(assignedTo); setClauses.push(`assigned_to = $${values.length}`); }
+        if (status) { values.push(status); setClauses.push(`status = ${values.length}`); }
+        if (content) { values.push(content); setClauses.push(`content = ${values.length}`); }
+        if (assigned_to !== undefined) { values.push(assigned_to); setClauses.push(`assigned_to = ${values.length}`); }
         if (description !== undefined) { values.push(description); setClauses.push(`description = $${values.length}`); }
         // Añadimos el nuevo campo de etiquetas
         if (tags !== undefined) { values.push(tags); setClauses.push(`tags = $${values.length}`); }
