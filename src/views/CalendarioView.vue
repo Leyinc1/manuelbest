@@ -24,6 +24,7 @@ import FullCalendar from '@fullcalendar/vue3';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import { useAuthStore } from '@/stores/authStore';
+import netlifyIdentity from 'netlify-identity-widget';
 
 const authStore = useAuthStore();
 const subjects = ref([]);
@@ -68,8 +69,15 @@ function addSubject() {
 
 async function loadSchedule() {
   if (!authStore.user) return;
+  const user = netlifyIdentity.currentUser();
+  const token = user.token.access_token;
+
   try {
-    const response = await fetch('/.netlify/functions/load-schedule');
+    const response = await fetch('/.netlify/functions/load-schedule', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const data = await response.json();
     if (response.ok) {
       calendarOptions.value.events = data.schedule;
@@ -81,9 +89,15 @@ async function loadSchedule() {
 
 async function saveSchedule(schedule) {
   if (!authStore.user) return;
+  const user = netlifyIdentity.currentUser();
+  const token = user.token.access_token;
+
   try {
     await fetch('/.netlify/functions/save-schedule', {
       method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ schedule }),
     });
   } catch (error) {

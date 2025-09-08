@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-const { context } = require('@netlify/functions');
 
 exports.handler = async (event, context) => {
   const { user } = context.clientContext;
