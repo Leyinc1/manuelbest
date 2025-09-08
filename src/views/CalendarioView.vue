@@ -4,11 +4,12 @@
       <h2>Materias</h2>
       <div class="subject-list">
         <div v-for="subject in subjects" :key="subject.id" class="subject-item" :style="{ backgroundColor: subject.color }" :data-event='JSON.stringify(subject)'>
-          {{ subject.title }}
+          {{ subject.title }} ({{ subject.duration }}h)
         </div>
       </div>
       <div class="add-subject">
         <input type="text" v-model="newSubjectTitle" placeholder="Nueva materia">
+        <input type="number" v-model="newSubjectDuration" placeholder="Horas" min="1">
         <input type="color" v-model="newSubjectColor">
         <button @click="addSubject">Agregar</button>
       </div>
@@ -33,6 +34,7 @@ const authStore = useAuthStore();
 const subjects = ref([]);
 const newSubjectTitle = ref('');
 const newSubjectColor = ref('#0077b6');
+const newSubjectDuration = ref(1);
 const fullCalendar = ref(null);
 
 const calendarOptions = ref({
@@ -53,10 +55,10 @@ const calendarOptions = ref({
     const subject = JSON.parse(info.draggedEl.dataset.event);
     info.event.setProp('backgroundColor', subject.color);
     info.event.setProp('borderColor', subject.color);
-    info.event.setEnd(new Date(info.event.start.getTime() + 60 * 60 * 1000));
+    info.event.setEnd(new Date(info.event.start.getTime() + subject.duration * 60 * 60 * 1000));
     localStorage.setItem(subject.title, subject.color);
   },
-  height: 'auto',
+  height: '100%',
 });
 
 onMounted(() => {
@@ -78,15 +80,17 @@ watch(() => authStore.user, (newUser) => {
 });
 
 function addSubject() {
-  if (newSubjectTitle.value) {
+  if (newSubjectTitle.value && newSubjectDuration.value > 0) {
     const newSubject = {
       id: Date.now().toString(),
       title: newSubjectTitle.value,
-      color: newSubjectColor.value
+      color: newSubjectColor.value,
+      duration: newSubjectDuration.value
     };
     subjects.value.push(newSubject);
     localStorage.setItem('subjects', JSON.stringify(subjects.value));
     newSubjectTitle.value = '';
+    newSubjectDuration.value = 1;
   }
 }
 
@@ -162,6 +166,7 @@ async function saveSchedule() {
   gap: 40px;
   flex-grow: 1;
   overflow: hidden;
+  height: 100%;
 }
 
 .subjects-container {
@@ -206,6 +211,13 @@ async function saveSchedule() {
   padding: 8px;
   border-radius: 8px 0 0 8px;
   border: 1px solid #ced4da;
+}
+
+.add-subject input[type="number"] {
+  width: 60px;
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-left: none;
 }
 
 .add-subject input[type="color"] {
