@@ -40,14 +40,17 @@ const router = createRouter({
       // Esto cargará el componente de la vista Kanban cuando se visite /kanban
       component: () => import('../views/KanbanView.vue'),
     },
-    /*
+    {
+      path: '/pomodoro',
+      name: 'pomodoro',
+      component: () => import('../views/PomodoroView.vue'),
+    },
     {
       path: '/calendario',
       name: 'calendario',
       // Dejamos esto preparado para el futuro
       component: () => import('../views/CalendarioView.vue'),
     },
-    */
     // Añadiremos las rutas para Kanban y Calendario más adelante
   ],
 })
