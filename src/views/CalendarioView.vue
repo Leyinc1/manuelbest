@@ -33,7 +33,7 @@ import netlifyIdentity from 'netlify-identity-widget';
 const authStore = useAuthStore();
 const subjects = ref([]);
 const newSubjectTitle = ref('');
-const newSubjectColor = ref('#0077b6');
+const newSubjectColor = ref('#3498db');
 const newSubjectDuration = ref(1);
 const fullCalendar = ref(null);
 
@@ -50,14 +50,6 @@ const calendarOptions = ref({
   eventDurationEditable: true,
   locale: esLocale,
   dayHeaderFormat: { weekday: 'long' },
-  slotLabelFormat: {
-    hour: 'numeric',
-    minute: '2-digit',
-    omitZeroMinute: false,
-    meridiem: 'short'
-  },
-  eventColor: '#3498db',
-  eventBorderColor: '#2980b9',
   events: [],
   eventReceive: function(info) {
     const subject = JSON.parse(info.draggedEl.dataset.event);
@@ -67,7 +59,7 @@ const calendarOptions = ref({
     localStorage.setItem(subject.title, subject.color);
   },
   height: 'auto',
-  contentHeight: 'auto',
+  aspectRatio: 1.5,
 });
 
 onMounted(() => {
@@ -178,12 +170,12 @@ async function saveSchedule() {
 }
 
 .subjects-container {
-  width: 250px;
-  min-width: 250px;
-  background-color: #f1f1f1;
+  width: 280px;
+  min-width: 280px;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .subjects-container h2 {
@@ -191,91 +183,90 @@ async function saveSchedule() {
   font-weight: 500;
   margin-bottom: 1rem;
   text-align: center;
+  color: #2c3e50;
 }
 
 .subject-list {
   margin-top: 20px;
-  height: calc(100% - 120px);
+  height: calc(100% - 140px);
   overflow-y: auto;
 }
 
 .subject-item {
   color: white;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
   margin-bottom: 10px;
   cursor: grab;
   font-weight: 500;
   text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.subject-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 .add-subject {
   margin-top: 20px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .add-subject input[type="text"] {
   flex-grow: 1;
-  padding: 8px;
-  border-radius: 8px 0 0 8px;
+  padding: 10px;
+  border-radius: 8px;
   border: 1px solid #ced4da;
+  width: 100%;
 }
 
 .add-subject input[type="number"] {
-  width: 60px;
-  padding: 8px;
+  width: 80px;
+  padding: 10px;
   border: 1px solid #ced4da;
-  border-left: none;
+  border-radius: 8px;
 }
 
 .add-subject input[type="color"] {
-  height: 38px;
-  width: 40px;
+  height: 42px;
+  width: 50px;
   border: 1px solid #ced4da;
   padding: 2px;
-  border-left: none;
+  border-radius: 8px;
 }
 
 .add-subject button {
-  padding: 8px 12px;
+  padding: 10px 15px;
   border: none;
-  background-color: #0077b6;
+  background-color: #3498db;
   color: white;
-  border-radius: 0 8px 8px 0;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
+  width: 100%;
 }
 
 .calendar-container {
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 :global(.fc) {
   flex-grow: 1;
 }
 
-:global(.fc .fc-timegrid-slot) {
-  background-color: #f8f9fa;
-}
-
-:global(.fc .fc-timegrid-slot-lane) {
-  border-color: #e9ecef;
-}
-
-:global(.fc-event) {
-  border-radius: 5px !important;
-  padding: 5px !important;
-  font-weight: 500 !important;
-}
-
 .save-button {
   margin-top: 20px;
   padding: 12px 24px;
   border: none;
-  background-color: #2a9d8f;
+  background-color: #2ecc71;
   color: white;
   cursor: pointer;
   font-size: 1rem;
@@ -287,6 +278,6 @@ async function saveSchedule() {
 }
 
 .save-button:hover {
-  background-color: #248a7f;
+  background-color: #27ae60;
 }
 </style>
