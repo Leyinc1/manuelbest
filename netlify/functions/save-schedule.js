@@ -1,6 +1,7 @@
 const { Pool } = require('pg');
 
 exports.handler = async (event, context) => {
+  console.log('Received event:', event);
   const { user } = context.clientContext;
   if (!user) {
     return {

@@ -40,8 +40,7 @@ const calendarOptions = ref({
   slotDuration: '01:00:00',
   droppable: true,
   events: [],
-  eventReceive: handleEventReceive,
-  eventChange: handleEventChange,
+  eventsSet: handleEventsSet,
   height: 'auto',
 });
 
@@ -88,6 +87,7 @@ async function loadSchedule() {
 }
 
 async function saveSchedule(schedule) {
+  console.log('Saving schedule:', schedule);
   if (!authStore.user) return;
   const user = netlifyIdentity.currentUser();
   const token = user.token.access_token;
@@ -105,14 +105,8 @@ async function saveSchedule(schedule) {
   }
 }
 
-function handleEventReceive(info) {
-  const newEvents = [...calendarOptions.value.events, info.event];
-  calendarOptions.value.events = newEvents;
-  saveSchedule(newEvents);
-}
-
-function handleEventChange() {
-  saveSchedule(calendarOptions.value.events);
+function handleEventsSet(events) {
+  saveSchedule(events);
 }
 
 </script>
