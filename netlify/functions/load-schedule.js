@@ -1,11 +1,30 @@
 const { Pool } = require('pg');
+const jwt = require('jsonwebtoken');
 
 exports.handler = async (event, context) => {
-  const { user } = context.clientContext;
-  if (!user) {
+  const { authorization } = event.headers;
+  if (!authorization) {
     return {
       statusCode: 401,
       body: JSON.stringify({ error: 'Unauthorized' }),
+    };
+  }
+
+  const token = authorization.split(' ')[1];
+  let user;
+  try {
+    user = jwt.decode(token);
+  } catch (error) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: 'Invalid token' }),
+    };
+  }
+
+  if (!user) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: 'Invalid token' }),
     };
   }
 
