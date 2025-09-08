@@ -1,30 +1,32 @@
 <template>
-  <div class="pomodoro-container">
-    <h1>Pomodoro Timer</h1>
-    <div class="timers">
-      <div class="timer-wrapper">
-        <h2>Work</h2>
-        <div class="timer">{{ formatTime(workTime) }}</div>
-        <div class="inputs">
-          <label for="workMinutes">Minutes:</label>
-          <input type="number" id="workMinutes" v-model.number="customWorkMinutes" min="1">
+  <div class="pomodoro-view">
+    <div class="pomodoro-container">
+      <h1>Pomodoro Timer</h1>
+      <div class="timers">
+        <div class="timer-wrapper">
+          <h2>Work</h2>
+          <div class="timer">{{ formatTime(workTime) }}</div>
+          <div class="inputs">
+            <label for="workMinutes">Minutes:</label>
+            <input type="number" id="workMinutes" v-model.number="customWorkMinutes" min="1">
+          </div>
+        </div>
+        <div class="timer-wrapper">
+          <h2>Break</h2>
+          <div class="timer">{{ formatTime(breakTime) }}</div>
+          <div class="inputs">
+            <label for="breakMinutes">Minutes:</label>
+            <input type="number" id="breakMinutes" v-model.number="customBreakMinutes" min="1">
+          </div>
         </div>
       </div>
-      <div class="timer-wrapper">
-        <h2>Break</h2>
-        <div class="timer">{{ formatTime(breakTime) }}</div>
-        <div class="inputs">
-          <label for="breakMinutes">Minutes:</label>
-          <input type="number" id="breakMinutes" v-model.number="customBreakMinutes" min="1">
-        </div>
+      <div class="controls">
+        <button @click="startWorkTimer" :disabled="isWorkRunning">Start Work</button>
+        <button @click="stopWorkTimer" :disabled="!isWorkRunning">Stop Work</button>
+        <button @click="startBreakTimer" :disabled="isBreakRunning">Start Break</button>
+        <button @click="stopBreakTimer" :disabled="!isBreakRunning">Stop Break</button>
+        <button @click="resetTimers">Reset</button>
       </div>
-    </div>
-    <div class="controls">
-      <button @click="startWorkTimer" :disabled="isWorkRunning">Start Work</button>
-      <button @click="stopWorkTimer" :disabled="!isWorkRunning">Stop Work</button>
-      <button @click="startBreakTimer" :disabled="isBreakRunning">Start Break</button>
-      <button @click="stopBreakTimer" :disabled="!isBreakRunning">Stop Break</button>
-      <button @click="resetTimers">Reset</button>
     </div>
   </div>
 </template>
@@ -54,6 +56,9 @@ const formatTime = (timeInSeconds) => {
 };
 
 const startWorkTimer = () => {
+  if (isBreakRunning.value) {
+    stopBreakTimer();
+  }
   isWorkRunning.value = true;
   workIntervalId = setInterval(() => {
     if (workTime.value > 0) {
@@ -71,6 +76,9 @@ const stopWorkTimer = () => {
 };
 
 const startBreakTimer = () => {
+  if (isWorkRunning.value) {
+    stopWorkTimer();
+  }
   isBreakRunning.value = true;
   breakIntervalId = setInterval(() => {
     if (breakTime.value > 0) {
@@ -104,17 +112,33 @@ watch(customBreakMinutes, (newMinutes) => {
 </script>
 
 <style scoped>
+.pomodoro-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  padding: 40px;
+}
+
 .pomodoro-container {
+  background-color: #f1f1f1;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100%;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
 }
 
 .timers {
   display: flex;
-  gap: 2rem;
+  gap: 4rem;
   margin-bottom: 2rem;
 }
 
@@ -122,8 +146,15 @@ watch(customBreakMinutes, (newMinutes) => {
   text-align: center;
 }
 
+.timer-wrapper h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
 .timer {
-  font-size: 4rem;
+  font-size: 6rem;
+  font-weight: 500;
   margin-bottom: 1rem;
 }
 
@@ -131,9 +162,39 @@ watch(customBreakMinutes, (newMinutes) => {
   margin-bottom: 1rem;
 }
 
+.inputs label {
+  margin-right: 0.5rem;
+}
+
+.inputs input {
+  width: 60px;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+}
+
 .controls button {
   margin: 0 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 12px 24px;
+  border: none;
+  background-color: #e9ecef;
+  color: #495057;
+  cursor: pointer;
   font-size: 1rem;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.controls button:hover {
+  background-color: #ced4da;
+  color: #212529;
+}
+
+.controls button:disabled {
+  background-color: #e9ecef;
+  color: #adb5bd;
+  cursor: not-allowed;
 }
 </style>
