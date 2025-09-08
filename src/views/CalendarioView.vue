@@ -19,19 +19,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
-
-const subjects = ref([
-  { id: '1', title: 'Matemáticas' },
-  { id: '2', title: 'Historia' },
-  { id: '3', title: 'Ciencias' },
-]);
+const subjects = ref([]);
 const newSubjectTitle = ref('');
 
 const calendarOptions = ref({
@@ -45,6 +40,8 @@ const calendarOptions = ref({
   droppable: true,
   events: [],
   eventReceive: handleEventReceive,
+  eventChange: handleEventChange,
+  height: 'auto',
 });
 
 onMounted(() => {
@@ -52,6 +49,14 @@ onMounted(() => {
     itemSelector: '.subject-item',
   });
   loadSchedule();
+});
+
+watch(() => authStore.user, (newUser) => {
+  if (newUser) {
+    loadSchedule();
+  } else {
+    calendarOptions.value.events = [];
+  }
 });
 
 function addSubject() {
@@ -92,6 +97,10 @@ function handleEventReceive(info) {
   saveSchedule(newEvents);
 }
 
+function handleEventChange() {
+  saveSchedule(calendarOptions.value.events);
+}
+
 </script>
 
 <style scoped>
@@ -100,17 +109,29 @@ function handleEventReceive(info) {
   padding: 40px;
   gap: 40px;
   flex-grow: 1;
+  overflow: hidden;
 }
 
 .subjects-container {
   width: 250px;
+  min-width: 250px;
   background-color: #f1f1f1;
   border-radius: 12px;
   padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.subjects-container h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 .subject-list {
   margin-top: 20px;
+  height: calc(100% - 120px);
+  overflow-y: auto;
 }
 
 .subject-item {
@@ -120,6 +141,8 @@ function handleEventReceive(info) {
   border-radius: 8px;
   margin-bottom: 10px;
   cursor: grab;
+  font-weight: 500;
+  text-align: center;
 }
 
 .add-subject {
@@ -141,9 +164,15 @@ function handleEventReceive(info) {
   color: white;
   border-radius: 0 8px 8px 0;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .calendar-container {
   flex-grow: 1;
+  height: 100%;
+}
+
+:global(.fc) {
+  height: 100%;
 }
 </style>

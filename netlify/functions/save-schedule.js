@@ -1,53 +1,54 @@
 const { Pool } = require('pg');
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
+const { context } = require('@netlify/functions');
 
 exports.handler = async (event, context) => {
-    // 1. Verificar que el usuario esté autenticado
-    const { user } = context.clientContext;
-    if (!user) {
-        return { statusCode: 401, body: 'Acceso no autorizado' };
+  const { user } = context.clientContext;
+  if (!user) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: 'Unauthorized' }),
+    };
+  }
+
+  const { schedule } = JSON.parse(event.body);
+  const user_id = user.sub;
+
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    await client.query('DELETE FROM schedule_items WHERE user_id = $1', [user_id]);
+
+    for (const item of schedule) {
+      const { title, start, end } = item;
+      const day = new Date(start).getDay();
+      const start_hour = new Date(start).getHours();
+      const duration = (new Date(end) - new Date(start)) / (1000 * 60 * 60);
+
+      await client.query(
+        'INSERT INTO schedule_items (course_name, day, start_hour, duration, user_id) VALUES ($1, $2, $3, $4, $5)',
+        [title, day, start_hour, duration, user_id]
+      );
     }
-    const userId = user.sub; // ID único del usuario de Netlify Identity
 
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
-    }
+    await client.query('COMMIT');
 
-    try {
-        const scheduleItems = JSON.parse(event.body);
-
-        const client = await pool.connect();
-        try {
-            await client.query('BEGIN');
-            
-            // 2. Borrar solo los items del usuario actual
-            await client.query('DELETE FROM schedule_items WHERE user_id = $1', [userId]);
-
-            // 3. Insertar los nuevos items con el ID del usuario
-            for (const item of scheduleItems) {
-                const query = `
-                    INSERT INTO schedule_items (course_name, day, start_hour, duration, user_id)
-                    VALUES ($1, $2, $3, $4, $5)
-                `;
-                await client.query(query, [item.course, parseInt(item.day), parseInt(item.startHour), parseInt(item.duration), userId]);
-            }
-            await client.query('COMMIT');
-        } catch (e) {
-            await client.query('ROLLBACK');
-            throw e;
-        } finally {
-            client.release();
-        }
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Horario guardado con éxito.' }),
-        };
-    } catch (error) {
-        console.error('Error saving schedule:', error);
-        return { statusCode: 500, body: JSON.stringify({ error: 'No se pudo guardar el horario.' }) };
-    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Schedule saved successfully' }),
+    };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error saving schedule:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Failed to save schedule' }),
+    };
+  } finally {
+    client.release();
+  }
 };

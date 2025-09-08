@@ -1,34 +1,51 @@
 const { Pool } = require('pg');
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
+const { context } = require('@netlify/functions');
 
 exports.handler = async (event, context) => {
-    // 1. Verificar que el usuario esté autenticado
-    const { user } = context.clientContext;
-    if (!user) {
-        return { statusCode: 401, body: 'Acceso no autorizado' };
-    }
-    const userId = user.sub; // ID único del usuario
+  const { user } = context.clientContext;
+  if (!user) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: 'Unauthorized' }),
+    };
+  }
 
-    try {
-        // 2. Seleccionar solo los items del usuario actual
-        const { rows } = await pool.query('SELECT course_name, day, start_hour, duration FROM schedule_items WHERE user_id = $1', [userId]);
-        
-        const scheduleItems = rows.map(row => ({
-            course: row.course_name,
-            day: row.day,
-            startHour: row.start_hour,
-            duration: row.duration,
-        }));
+  const user_id = user.sub;
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify(scheduleItems),
-        };
-    } catch (error) {
-        console.error('Error loading schedule:', error);
-        return { statusCode: 500, body: JSON.stringify({ error: 'No se pudo cargar el horario.' }) };
-    }
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
+
+  const client = await pool.connect();
+
+  try {
+    const result = await client.query('SELECT * FROM schedule_items WHERE user_id = $1', [user_id]);
+    const schedule = result.rows.map(item => {
+      const start = new Date();
+      start.setHours(item.start_hour, 0, 0, 0);
+      start.setDate(start.getDate() - start.getDay() + item.day);
+
+      const end = new Date(start);
+      end.setHours(end.getHours() + item.duration);
+
+      return {
+        title: item.course_name,
+        start,
+        end,
+      };
+    });
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ schedule }),
+    };
+  } catch (error) {
+    console.error('Error loading schedule:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Failed to load schedule' }),
+    };
+  } finally {
+    client.release();
+  }
 };
