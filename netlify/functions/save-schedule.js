@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
 
     for (const item of schedule) {
       console.log('Processing item:', item);
-      const { title, start, end } = item;
+      const { title, start, end, color } = item;
 
       if (!start || !end) {
         console.error('Invalid start or end date for item:', item);
@@ -63,8 +63,8 @@ exports.handler = async (event, context) => {
       const duration = (endDate - startDate) / (1000 * 60 * 60);
 
       await client.query(
-        'INSERT INTO schedule_items (course_name, day, start_hour, duration, user_id) VALUES ($1, $2, $3, $4, $5)',
-        [title, day, start_hour, duration, user_id]
+        'INSERT INTO schedule_items (course_name, day, start_hour, duration, user_id, color) VALUES ($1, $2, $3, $4, $5, $6)',
+        [title, day, start_hour, duration, user_id, color]
       );
     }
 

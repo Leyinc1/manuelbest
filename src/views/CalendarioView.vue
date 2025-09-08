@@ -3,12 +3,13 @@
     <div class="subjects-container">
       <h2>Materias</h2>
       <div class="subject-list">
-        <div v-for="subject in subjects" :key="subject.id" class="subject-item" :data-event='JSON.stringify(subject)'>
+        <div v-for="subject in subjects" :key="subject.id" class="subject-item" :style="{ backgroundColor: subject.color }" :data-event='JSON.stringify(subject)'>
           {{ subject.title }}
         </div>
       </div>
       <div class="add-subject">
         <input type="text" v-model="newSubjectTitle" placeholder="Nueva materia">
+        <input type="color" v-model="newSubjectColor">
         <button @click="addSubject">Agregar</button>
       </div>
     </div>
@@ -24,12 +25,14 @@ import { ref, onMounted, watch } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
+import esLocale from '@fullcalendar/core/locales/es';
 import { useAuthStore } from '@/stores/authStore';
 import netlifyIdentity from 'netlify-identity-widget';
 
 const authStore = useAuthStore();
 const subjects = ref([]);
 const newSubjectTitle = ref('');
+const newSubjectColor = ref('#0077b6');
 const fullCalendar = ref(null);
 
 const calendarOptions = ref({
@@ -41,8 +44,15 @@ const calendarOptions = ref({
   slotMaxTime: '23:00:00',
   slotDuration: '01:00:00',
   droppable: true,
+  editable: true,
+  eventDurationEditable: true,
+  locale: esLocale,
+  dayHeaderFormat: { weekday: 'long' },
   events: [],
   eventReceive: function(info) {
+    const subject = JSON.parse(info.draggedEl.dataset.event);
+    info.event.setProp('backgroundColor', subject.color);
+    info.event.setProp('borderColor', subject.color);
     info.event.setEnd(new Date(info.event.start.getTime() + 60 * 60 * 1000));
   },
   height: 'auto',
@@ -65,7 +75,11 @@ watch(() => authStore.user, (newUser) => {
 
 function addSubject() {
   if (newSubjectTitle.value) {
-    subjects.value.push({ id: Date.now().toString(), title: newSubjectTitle.value });
+    subjects.value.push({ 
+      id: Date.now().toString(), 
+      title: newSubjectTitle.value,
+      color: newSubjectColor.value
+    });
     newSubjectTitle.value = '';
   }
 }
@@ -83,7 +97,11 @@ async function loadSchedule() {
     });
     const data = await response.json();
     if (response.ok) {
-      calendarOptions.value.events = data.schedule;
+      calendarOptions.value.events = data.schedule.map(event => ({
+        ...event,
+        backgroundColor: event.color,
+        borderColor: event.color
+      }));
     }
   } catch (error) {
     console.error('Error loading schedule:', error);
@@ -99,6 +117,7 @@ async function saveSchedule() {
     title: event.title,
     start: event.start,
     end: event.end,
+    color: event.backgroundColor
   }));
 
   console.log('Saving schedule:', schedule);
@@ -150,7 +169,6 @@ async function saveSchedule() {
 }
 
 .subject-item {
-  background-color: #0077b6;
   color: white;
   padding: 10px;
   border-radius: 8px;
@@ -165,11 +183,19 @@ async function saveSchedule() {
   display: flex;
 }
 
-.add-subject input {
+.add-subject input[type="text"] {
   flex-grow: 1;
   padding: 8px;
   border-radius: 8px 0 0 8px;
   border: 1px solid #ced4da;
+}
+
+.add-subject input[type="color"] {
+  height: 38px;
+  width: 40px;
+  border: 1px solid #ced4da;
+  padding: 2px;
+  border-left: none;
 }
 
 .add-subject button {

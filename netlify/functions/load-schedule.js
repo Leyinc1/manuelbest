@@ -50,6 +50,7 @@ exports.handler = async (event, context) => {
         title: item.course_name,
         start,
         end,
+        color: item.color,
       };
     });
 
