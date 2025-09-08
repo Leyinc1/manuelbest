@@ -50,7 +50,6 @@ exports.handler = async (event, context) => {
         title: item.course_name,
         start,
         end,
-        color: item.color,
       };
     });
 
@@ -62,7 +61,7 @@ exports.handler = async (event, context) => {
     console.error('Error loading schedule:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to load schedule' }),
+      body: JSON.stringify({ error: 'Failed to save schedule' }),
     };
   } finally {
     client.release();

@@ -54,6 +54,7 @@ const calendarOptions = ref({
     info.event.setProp('backgroundColor', subject.color);
     info.event.setProp('borderColor', subject.color);
     info.event.setEnd(new Date(info.event.start.getTime() + 60 * 60 * 1000));
+    localStorage.setItem(subject.title, subject.color);
   },
   height: 'auto',
 });
@@ -63,24 +64,36 @@ onMounted(() => {
     itemSelector: '.subject-item',
   });
   loadSchedule();
+  loadSubjects();
 });
 
 watch(() => authStore.user, (newUser) => {
   if (newUser) {
     loadSchedule();
+    loadSubjects();
   } else {
     calendarOptions.value.events = [];
+    subjects.value = [];
   }
 });
 
 function addSubject() {
   if (newSubjectTitle.value) {
-    subjects.value.push({ 
-      id: Date.now().toString(), 
+    const newSubject = {
+      id: Date.now().toString(),
       title: newSubjectTitle.value,
       color: newSubjectColor.value
-    });
+    };
+    subjects.value.push(newSubject);
+    localStorage.setItem('subjects', JSON.stringify(subjects.value));
     newSubjectTitle.value = '';
+  }
+}
+
+function loadSubjects() {
+  const storedSubjects = localStorage.getItem('subjects');
+  if (storedSubjects) {
+    subjects.value = JSON.parse(storedSubjects);
   }
 }
 
@@ -97,11 +110,14 @@ async function loadSchedule() {
     });
     const data = await response.json();
     if (response.ok) {
-      calendarOptions.value.events = data.schedule.map(event => ({
-        ...event,
-        backgroundColor: event.color,
-        borderColor: event.color
-      }));
+      calendarOptions.value.events = data.schedule.map(event => {
+        const color = localStorage.getItem(event.title);
+        return {
+          ...event,
+          backgroundColor: color || '#0077b6',
+          borderColor: color || '#0077b6',
+        };
+      });
     }
   } catch (error) {
     console.error('Error loading schedule:', error);
@@ -113,12 +129,14 @@ async function saveSchedule() {
   const user = netlifyIdentity.currentUser();
   const token = user.token.access_token;
   const calendarApi = fullCalendar.value.getApi();
-  const schedule = calendarApi.getEvents().map(event => ({
-    title: event.title,
-    start: event.start,
-    end: event.end,
-    color: event.backgroundColor
-  }));
+  const schedule = calendarApi.getEvents().map(event => {
+    localStorage.setItem(event.title, event.backgroundColor);
+    return {
+      title: event.title,
+      start: event.start,
+      end: event.end,
+    };
+  });
 
   console.log('Saving schedule:', schedule);
 
