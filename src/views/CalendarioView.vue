@@ -42,6 +42,9 @@ const calendarOptions = ref({
   slotDuration: '01:00:00',
   droppable: true,
   events: [],
+  eventReceive: function(info) {
+    info.event.setEnd(new Date(info.event.start.getTime() + 60 * 60 * 1000));
+  },
   height: 'auto',
 });
 
@@ -92,7 +95,11 @@ async function saveSchedule() {
   const user = netlifyIdentity.currentUser();
   const token = user.token.access_token;
   const calendarApi = fullCalendar.value.getApi();
-  const schedule = calendarApi.getEvents();
+  const schedule = calendarApi.getEvents().map(event => ({
+    title: event.title,
+    start: event.start,
+    end: event.end,
+  }));
 
   console.log('Saving schedule:', schedule);
 
