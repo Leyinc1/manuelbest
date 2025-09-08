@@ -13,7 +13,8 @@
       </div>
     </div>
     <div class="calendar-container">
-      <FullCalendar :options="calendarOptions" />
+      <FullCalendar :options="calendarOptions" ref="fullCalendar" />
+      <button class="save-button" @click="saveSchedule">Guardar Calendario</button>
     </div>
   </div>
 </template>
@@ -29,6 +30,7 @@ import netlifyIdentity from 'netlify-identity-widget';
 const authStore = useAuthStore();
 const subjects = ref([]);
 const newSubjectTitle = ref('');
+const fullCalendar = ref(null);
 
 const calendarOptions = ref({
   plugins: [timeGridPlugin, interactionPlugin],
@@ -40,7 +42,6 @@ const calendarOptions = ref({
   slotDuration: '01:00:00',
   droppable: true,
   events: [],
-  eventsSet: handleEventsSet,
   height: 'auto',
 });
 
@@ -86,11 +87,14 @@ async function loadSchedule() {
   }
 }
 
-async function saveSchedule(schedule) {
-  console.log('Saving schedule:', schedule);
+async function saveSchedule() {
   if (!authStore.user) return;
   const user = netlifyIdentity.currentUser();
   const token = user.token.access_token;
+  const calendarApi = fullCalendar.value.getApi();
+  const schedule = calendarApi.getEvents();
+
+  console.log('Saving schedule:', schedule);
 
   try {
     await fetch('/.netlify/functions/save-schedule', {
@@ -103,10 +107,6 @@ async function saveSchedule(schedule) {
   } catch (error) {
     console.error('Error saving schedule:', error);
   }
-}
-
-function handleEventsSet(events) {
-  saveSchedule(events);
 }
 
 </script>
@@ -178,9 +178,30 @@ function handleEventsSet(events) {
 .calendar-container {
   flex-grow: 1;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 :global(.fc) {
-  height: 100%;
+  flex-grow: 1;
+}
+
+.save-button {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border: none;
+  background-color: #2a9d8f;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+  align-self: center;
+}
+
+.save-button:hover {
+  background-color: #248a7f;
 }
 </style>
