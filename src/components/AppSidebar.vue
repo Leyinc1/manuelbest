@@ -11,6 +11,7 @@
         <RouterLink to="/tecnologias" class="nav-button">Tecnologías</RouterLink>
         <RouterLink to="/proyectos" class="nav-button">Proyectos</RouterLink>
         <RouterLink to="/intereses" class="nav-button">Intereses</RouterLink>
+        <RouterLink to="/Perfiles" class="nav-button">Perfiles Recomendados</RouterLink>
       </nav>
       <hr />
       <UserStatus />
