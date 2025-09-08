@@ -42,7 +42,7 @@ const calendarOptions = ref({
   initialView: 'timeGridWeek',
   headerToolbar: false,
   allDaySlot: false,
-  slotMinTime: '07:30:00',
+  slotMinTime: '07:00:00',
   slotMaxTime: '23:00:00',
   slotDuration: '01:00:00',
   droppable: true,
@@ -50,6 +50,14 @@ const calendarOptions = ref({
   eventDurationEditable: true,
   locale: esLocale,
   dayHeaderFormat: { weekday: 'long' },
+  slotLabelFormat: {
+    hour: 'numeric',
+    minute: '2-digit',
+    omitZeroMinute: false,
+    meridiem: 'short'
+  },
+  eventColor: '#3498db',
+  eventBorderColor: '#2980b9',
   events: [],
   eventReceive: function(info) {
     const subject = JSON.parse(info.draggedEl.dataset.event);
@@ -58,7 +66,8 @@ const calendarOptions = ref({
     info.event.setEnd(new Date(info.event.start.getTime() + subject.duration * 60 * 60 * 1000));
     localStorage.setItem(subject.title, subject.color);
   },
-  height: '100%',
+  height: 'auto',
+  contentHeight: 'auto',
 });
 
 onMounted(() => {
@@ -118,8 +127,8 @@ async function loadSchedule() {
         const color = localStorage.getItem(event.title);
         return {
           ...event,
-          backgroundColor: color || '#0077b6',
-          borderColor: color || '#0077b6',
+          backgroundColor: color || '#3498db',
+          borderColor: color || '#2980b9',
         };
       });
     }
@@ -166,7 +175,6 @@ async function saveSchedule() {
   gap: 40px;
   flex-grow: 1;
   overflow: hidden;
-  height: 100%;
 }
 
 .subjects-container {
@@ -240,13 +248,27 @@ async function saveSchedule() {
 
 .calendar-container {
   flex-grow: 1;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 :global(.fc) {
   flex-grow: 1;
+}
+
+:global(.fc .fc-timegrid-slot) {
+  background-color: #f8f9fa;
+}
+
+:global(.fc .fc-timegrid-slot-lane) {
+  border-color: #e9ecef;
+}
+
+:global(.fc-event) {
+  border-radius: 5px !important;
+  padding: 5px !important;
+  font-weight: 500 !important;
 }
 
 .save-button {
