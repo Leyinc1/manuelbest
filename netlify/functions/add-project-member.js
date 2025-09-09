@@ -43,8 +43,8 @@ exports.handler = async function (event, context) {
         }
 
         // 3. Buscar el ID del usuario invitado en nuestra tabla `users` usando su email
-        const userSearchQuery = 'SELECT id FROM users WHERE email = $1';
-        const userSearchResult = await client.query(userSearchQuery, [newUserEmail]);
+        const userSearchQuery = 'SELECT id FROM users WHERE LOWER(email) = LOWER($1)';
+        const userSearchResult = await client.query(userSearchQuery, [newUserEmail.trim()]);
         if (userSearchResult.rowCount === 0) {
             return { statusCode: 404, body: JSON.stringify({ error: 'El usuario con ese email no existe. Pídele que se registre primero.' }) };
         }
