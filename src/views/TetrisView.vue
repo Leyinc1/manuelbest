@@ -35,31 +35,31 @@ export default {
       tetrominoes: {
         'I': {
           shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
-          color: 'cyan',
+          color: '#00ffff', // Neon Cyan
         },
         'J': {
           shape: [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
-          color: 'blue',
+          color: '#0000ff', // Neon Blue
         },
         'L': {
           shape: [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
-          color: 'orange',
+          color: '#ff7f00', // Neon Orange
         },
         'O': {
           shape: [[1, 1], [1, 1]],
-          color: 'yellow',
+          color: '#ffff00', // Neon Yellow
         },
         'S': {
           shape: [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
-          color: 'green',
+          color: '#00ff00', // Neon Green
         },
         'T': {
           shape: [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
-          color: 'purple',
+          color: '#800080', // Neon Purple
         },
         'Z': {
           shape: [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
-          color: 'red',
+          color: '#ff0000', // Neon Red
         },
       },
       gameInterval: null,
@@ -119,10 +119,25 @@ export default {
       }
     },
     drawBlock(x, y, color) {
+      const px = x * this.blockSize;
+      const py = y * this.blockSize;
+
+      // Main block color
       this.ctx.fillStyle = color;
-      this.ctx.fillRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
-      this.ctx.strokeStyle = 'black';
-      this.ctx.strokeRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
+      this.ctx.fillRect(px, py, this.blockSize, this.blockSize);
+
+      // 3D effect
+      this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'; // Lighter shade for top/left
+      this.ctx.fillRect(px, py, this.blockSize, 2); // Top highlight
+      this.ctx.fillRect(px, py, 2, this.blockSize); // Left highlight
+
+      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'; // Darker shade for bottom/right
+      this.ctx.fillRect(px + this.blockSize - 2, py, 2, this.blockSize); // Right shadow
+      this.ctx.fillRect(px, py + this.blockSize - 2, this.blockSize, 2); // Bottom shadow
+
+      // Border
+      this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+      this.ctx.strokeRect(px, py, this.blockSize, this.blockSize);
     },
     drawNextPiece() {
       this.nextCtx.clearRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
@@ -368,73 +383,102 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 .tetris-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Added for vertical centering */
+  justify-content: center;
   padding: 20px;
-  background-color: #f0f0f0;
-  min-height: 100vh; /* Ensures it takes full viewport height */
+  background-color: #1a1a1a; /* Dark background */
+  min-height: 100vh;
+  font-family: 'Press Start 2P', cursive; /* Retro font */
 }
 
 h1 {
-  color: #333;
+  color: #e0e0e0;
+  text-shadow: 2px 2px 4px #000;
   margin-bottom: 20px;
+  font-size: 2.5em;
 }
 
 .game-area {
   display: flex;
-  gap: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  flex-grow: 1; /* Allow it to grow and take available space */
-  min-height: 450px; /* Minimum height to ensure visibility */
+  gap: 30px;
+  background-color: #2c2c2c; /* Darker panel background */
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  padding: 25px;
+  border: 3px solid #444;
 }
 
 #tetris-canvas {
-  border: 2px solid #333;
-  background-color: #000;
-  display: block;
+  border: 5px solid #000;
+  background-color: #0d0d0d; /* Very dark canvas background */
+  border-radius: 5px;
+  box-shadow: inset 0 0 10px #000;
 }
 
 .info-panel {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 10px;
-  padding: 10px;
-  border: 1px solid #eee;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  align-items: center; /* Center content */
+  gap: 20px;
+  padding: 20px;
+  border: 3px solid #444;
+  border-radius: 10px;
+  background-color: #1a1a1a;
+  width: 150px; /* Fixed width for the panel */
 }
 
 .score,
 .next-piece {
-  font-size: 1.2em;
-  font-weight: bold;
-  color: #555;
+  font-size: 1em;
+  font-weight: normal;
+  color: #00ffde; /* Neon text color */
+  text-align: center;
+}
+
+.score-value {
+  font-size: 1.5em;
+  color: #fff;
+  margin-top: 5px;
 }
 
 #next-piece-canvas {
-  border: 1px solid #ccc;
-  background-color: #eee;
+  border: 2px solid #555;
+  background-color: #0d0d0d;
+  border-radius: 5px;
+  box-shadow: inset 0 0 5px #000;
 }
 
 button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
+  padding: 15px 10px;
+  width: 100%;
+  background: linear-gradient(45deg, #ff00ff, #00ffde);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1em;
-  transition: background-color 0.3s ease;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 button:hover {
-  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Adding a class to the score display for better styling */
+.score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>
