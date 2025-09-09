@@ -56,21 +56,21 @@ export const useKanbanStore = defineStore('kanban', () => {
       'in-progress': [],
       testing: [],
       done: [],
-    };
+    }
 
-    tasks.value.forEach(task => {
-      const status = task.status || 'todo'; // Si el estado es nulo o indefinido, se asigna a 'todo'
+    tasks.value.forEach((task) => {
+      const status = task.status || 'todo' // Si el estado es nulo o indefinido, se asigna a 'todo'
       if (categorizedTasks[status]) {
-        categorizedTasks[status].push(task);
+        categorizedTasks[status].push(task)
       } else {
         // Opcional: manejar estados inesperados si es necesario
-        console.warn(`Tarea con estado inesperado: ${status}`, task);
-        categorizedTasks.todo.push(task); // O ponerla en una columna por defecto
+        console.warn(`Tarea con estado inesperado: ${status}`, task)
+        categorizedTasks.todo.push(task) // O ponerla en una columna por defecto
       }
-    });
+    })
 
-    return categorizedTasks;
-  });
+    return categorizedTasks
+  })
 
   const selectedProjectName = computed(() => {
     const project = projects.value.find((p) => p.id === currentProjectId.value)
@@ -80,20 +80,23 @@ export const useKanbanStore = defineStore('kanban', () => {
   // --- ACTIONS ---
   async function fetchTasks() {
     if (!currentProjectId.value) {
-      console.log('fetchTasks abortado: no hay currentProjectId.');
-      return;
+      console.log('fetchTasks abortado: no hay currentProjectId.')
+      return
     }
-    console.log(`Fetching tasks for project: ${currentProjectId.value}`);
+    console.log(`Fetching tasks for project: ${currentProjectId.value}`)
     const fetchedTasks = await apiCall(
       `/.netlify/functions/get-tasks?projectId=${currentProjectId.value}`,
-    );
+    )
     if (fetchedTasks && fetchedTasks.length > 0) {
-      console.log('Tasks fetched successfully:', fetchedTasks);
-      tasks.value = fetchedTasks;
+      console.log('Tasks fetched successfully:', fetchedTasks)
+      tasks.value = fetchedTasks
     } else {
-      console.log('fetchTasks no devolvió tareas o la respuesta estaba vacía. La respuesta fue:', fetchedTasks);
+      console.log(
+        'fetchTasks no devolvió tareas o la respuesta estaba vacía. La respuesta fue:',
+        fetchedTasks,
+      )
       // Si no hay tareas, nos aseguramos de que el array local esté vacío.
-      tasks.value = [];
+      tasks.value = []
     }
   }
 
@@ -152,21 +155,21 @@ export const useKanbanStore = defineStore('kanban', () => {
   }
 
   async function deleteTask(taskId) {
-    console.log(`Intentando eliminar la tarea con ID: ${taskId}`);
+    console.log(`Intentando eliminar la tarea con ID: ${taskId}`)
     if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
-      console.log('Usuario confirmó la eliminación.');
+      console.log('Usuario confirmó la eliminación.')
       const result = await apiCall(`/.netlify/functions/delete-task?id=${taskId}`, {
         method: 'DELETE',
-      });
-      console.log('Resultado de la API de eliminación:', result);
+      })
+      console.log('Resultado de la API de eliminación:', result)
       if (result) {
-        tasks.value = tasks.value.filter((t) => t.id !== taskId);
-        console.log('Tarea eliminada del estado local.');
+        tasks.value = tasks.value.filter((t) => t.id !== taskId)
+        console.log('Tarea eliminada del estado local.')
       } else {
-        console.error('La eliminación de la tarea falló. La API no devolvió un resultado exitoso.');
+        console.error('La eliminación de la tarea falló. La API no devolvió un resultado exitoso.')
       }
     } else {
-      console.log('Usuario canceló la eliminación.');
+      console.log('Usuario canceló la eliminación.')
     }
   }
 
@@ -248,23 +251,23 @@ export const useKanbanStore = defineStore('kanban', () => {
 
   async function updateTaskStatus(taskId, newStatus) {
     // Find the task in the local state
-    const taskIndex = tasks.value.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) return;
+    const taskIndex = tasks.value.findIndex((t) => t.id === taskId)
+    if (taskIndex === -1) return
 
     // Optimistically update the local state
-    const oldStatus = tasks.value[taskIndex].status;
-    tasks.value[taskIndex].status = newStatus;
+    const oldStatus = tasks.value[taskIndex].status
+    tasks.value[taskIndex].status = newStatus
 
     // Make the API call to update the backend
     const result = await apiCall('/.netlify/functions/update-task', {
       method: 'PUT',
       body: JSON.stringify({ id: taskId, status: newStatus }),
-    });
+    })
 
     // If the API call fails, revert the change
     if (!result) {
-      tasks.value[taskIndex].status = oldStatus;
-      alert('Error: No se pudo actualizar la tarea. Por favor, inténtalo de nuevo.');
+      tasks.value[taskIndex].status = oldStatus
+      alert('Error: No se pudo actualizar la tarea. Por favor, inténtalo de nuevo.')
     }
   }
 

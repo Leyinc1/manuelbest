@@ -29,5 +29,3 @@
 import { RouterLink } from 'vue-router'
 import UserStatus from './UserStatus.vue'
 </script>
-
-

@@ -10,13 +10,31 @@ export default defineConfig([
     files: ['**/*.{js,mjs,jsx,vue}'],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '.vscode/**']),
 
   {
     languageOptions: {
       globals: {
         ...globals.browser,
       },
+    },
+  },
+
+  // New configuration for Netlify functions
+  {
+    name: 'netlify/functions',
+    files: ['netlify/functions/**/*.js'], // Target all JS files in netlify/functions
+    languageOptions: {
+      globals: {
+        ...globals.node, // Add Node.js globals
+      },
+      ecmaVersion: 2022, // Ensure modern JS features are recognized
+      sourceType: 'commonjs', // Netlify functions often use CommonJS modules
+    },
+    rules: {
+      // You might want to add specific rules for Node.js environment here
+      // For example, if you want to disallow console.log in production
+      // 'no-console': 'warn',
     },
   },
 

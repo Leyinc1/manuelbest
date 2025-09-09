@@ -26,11 +26,10 @@
       <li class="texto-pequeño">No olvides guardar tu horario!</li>
       <li class="texto-pequeño">Proximamente: Colores personalizados</li>
       <li class="indice">
-        <RouterLink to="/pomodoro">Pomodoro</RouterLink> - Reloj Pomodoro para sesiones de estudio y trabajo.
+        <RouterLink to="/pomodoro">Pomodoro</RouterLink> - Reloj Pomodoro para sesiones de estudio y
+        trabajo.
       </li>
-      <li class="texto-pequeño">
-        Proximamente: Totalmente personalizable.
-      </li>
+      <li class="texto-pequeño">Proximamente: Totalmente personalizable.</li>
     </ul>
   </section>
 </template>

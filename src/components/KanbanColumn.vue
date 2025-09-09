@@ -14,7 +14,9 @@
         <TaskCard :task="element" :status-id="statusId" />
       </template>
     </draggable>
-    <button class="add-task-btn" @click="kanbanStore.openModalForNew(statusId)">Añadir tarea</button>
+    <button class="add-task-btn" @click="kanbanStore.openModalForNew(statusId)">
+      Añadir tarea
+    </button>
   </div>
 </template>
 

@@ -8,7 +8,7 @@
           <div class="timer">{{ formatTime(workTime) }}</div>
           <div class="inputs">
             <label for="workMinutes">Minutes:</label>
-            <input type="number" id="workMinutes" v-model.number="customWorkMinutes" min="1">
+            <input type="number" id="workMinutes" v-model.number="customWorkMinutes" min="1" />
           </div>
         </div>
         <div class="timer-wrapper">
@@ -16,7 +16,7 @@
           <div class="timer">{{ formatTime(breakTime) }}</div>
           <div class="inputs">
             <label for="breakMinutes">Minutes:</label>
-            <input type="number" id="breakMinutes" v-model.number="customBreakMinutes" min="1">
+            <input type="number" id="breakMinutes" v-model.number="customBreakMinutes" min="1" />
           </div>
         </div>
       </div>
@@ -32,83 +32,82 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue'
 
-const defaultWorkMinutes = 25;
-const defaultBreakMinutes = 5;
+const defaultWorkMinutes = 25
+const defaultBreakMinutes = 5
 
-const customWorkMinutes = ref(defaultWorkMinutes);
-const customBreakMinutes = ref(defaultBreakMinutes);
+const customWorkMinutes = ref(defaultWorkMinutes)
+const customBreakMinutes = ref(defaultBreakMinutes)
 
-const workTime = ref(customWorkMinutes.value * 60);
-const breakTime = ref(customBreakMinutes.value * 60);
+const workTime = ref(customWorkMinutes.value * 60)
+const breakTime = ref(customBreakMinutes.value * 60)
 
-const isWorkRunning = ref(false);
-const isBreakRunning = ref(false);
+const isWorkRunning = ref(false)
+const isBreakRunning = ref(false)
 
-let workIntervalId = null;
-let breakIntervalId = null;
+let workIntervalId = null
+let breakIntervalId = null
 
 const formatTime = (timeInSeconds) => {
-  const minutes = Math.floor(timeInSeconds / 60);
-  const seconds = timeInSeconds % 60;
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-};
+  const minutes = Math.floor(timeInSeconds / 60)
+  const seconds = timeInSeconds % 60
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+}
 
 const startWorkTimer = () => {
   if (isBreakRunning.value) {
-    stopBreakTimer();
+    stopBreakTimer()
   }
-  isWorkRunning.value = true;
+  isWorkRunning.value = true
   workIntervalId = setInterval(() => {
     if (workTime.value > 0) {
-      workTime.value--;
+      workTime.value--
     } else {
-      stopWorkTimer();
-      startBreakTimer();
+      stopWorkTimer()
+      startBreakTimer()
     }
-  }, 1000);
-};
+  }, 1000)
+}
 
 const stopWorkTimer = () => {
-  isWorkRunning.value = false;
-  clearInterval(workIntervalId);
-};
+  isWorkRunning.value = false
+  clearInterval(workIntervalId)
+}
 
 const startBreakTimer = () => {
   if (isWorkRunning.value) {
-    stopWorkTimer();
+    stopWorkTimer()
   }
-  isBreakRunning.value = true;
+  isBreakRunning.value = true
   breakIntervalId = setInterval(() => {
     if (breakTime.value > 0) {
-      breakTime.value--;
+      breakTime.value--
     } else {
-      stopBreakTimer();
+      stopBreakTimer()
     }
-  }, 1000);
-};
+  }, 1000)
+}
 
 const stopBreakTimer = () => {
-  isBreakRunning.value = false;
-  clearInterval(breakIntervalId);
-};
+  isBreakRunning.value = false
+  clearInterval(breakIntervalId)
+}
 
 const resetTimers = () => {
-  stopWorkTimer();
-  stopBreakTimer();
-  workTime.value = customWorkMinutes.value * 60;
-  breakTime.value = customBreakMinutes.value * 60;
-};
+  stopWorkTimer()
+  stopBreakTimer()
+  workTime.value = customWorkMinutes.value * 60
+  breakTime.value = customBreakMinutes.value * 60
+}
 
 watch(customWorkMinutes, (newMinutes) => {
-  workTime.value = newMinutes * 60;
-});
+  workTime.value = newMinutes * 60
+})
 
 watch(customBreakMinutes, (newMinutes) => {
-  breakTime.value = newMinutes * 60;
-});
-
+  breakTime.value = newMinutes * 60
+})
 </script>
 
 <style scoped>
@@ -184,7 +183,9 @@ h1 {
   font-weight: 500;
   font-family: 'Poppins', sans-serif;
   border-radius: 8px;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .controls button:hover {

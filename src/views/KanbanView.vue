@@ -4,14 +4,22 @@
       <ProjectSelector />
 
       <div v-if="kanbanStore.projects.length > 0" class="kanban-board">
-        <KanbanColumn title="Requerimientos" statusId="requerimientos" :tasks="kanbanStore.tasksByStatus.requerimientos" />
+        <KanbanColumn
+          title="Requerimientos"
+          statusId="requerimientos"
+          :tasks="kanbanStore.tasksByStatus.requerimientos"
+        />
         <KanbanColumn title="Por Hacer" statusId="todo" :tasks="kanbanStore.tasksByStatus.todo" />
         <KanbanColumn
           title="En Progreso"
           statusId="in-progress"
           :tasks="kanbanStore.tasksByStatus['in-progress']"
         />
-        <KanbanColumn title="Testing" statusId="testing" :tasks="kanbanStore.tasksByStatus.testing" />
+        <KanbanColumn
+          title="Testing"
+          statusId="testing"
+          :tasks="kanbanStore.tasksByStatus.testing"
+        />
         <KanbanColumn title="Hecho" statusId="done" :tasks="kanbanStore.tasksByStatus.done" />
       </div>
       <div v-else class="no-projects">

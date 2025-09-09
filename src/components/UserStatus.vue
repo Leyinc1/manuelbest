@@ -22,15 +22,15 @@ const authStore = useAuthStore()
   padding: 10px 0;
 }
 
-.user-info, .login-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
+.user-info,
+.login-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
 }
 
 .user-info span {
-    font-weight: 500;
+  font-weight: 500;
 }
-
 </style>
