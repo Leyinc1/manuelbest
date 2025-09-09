@@ -45,7 +45,7 @@ exports.handler = async (event, context) => {
 
         // Input validation and building setClauses
         if (status !== undefined) {
-            const allowedStatuses = ['todo', 'in-progress', 'done'];
+            const allowedStatuses = ['todo', 'in-progress', 'done', 'requerimientos', 'testing'];
             if (!allowedStatuses.includes(status)) {
                 return { statusCode: 400, body: JSON.stringify({ error: 'Estado de tarea inválido.' }) };
             }

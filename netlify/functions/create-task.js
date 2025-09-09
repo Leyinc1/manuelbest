@@ -18,7 +18,7 @@ exports.handler = async (event) => {
         if (!content || typeof content !== 'string' || content.trim() === '') {
             return { statusCode: 400, body: JSON.stringify({ error: 'El contenido de la tarea no puede estar vacío.' }) };
         }
-        const allowedStatuses = ['todo', 'in-progress', 'done']; // Example allowed statuses
+        const allowedStatuses = ['todo', 'in-progress', 'done', 'requerimientos', 'testing']; // Example allowed statuses
         if (!status || !allowedStatuses.includes(status)) {
             return { statusCode: 400, body: JSON.stringify({ error: 'Estado de tarea inválido.' }) };
         }
