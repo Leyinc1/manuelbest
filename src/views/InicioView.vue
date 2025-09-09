@@ -31,6 +31,9 @@
       </li>
       <li class="texto-pequeño">Proximamente: Totalmente personalizable.</li>
     </ul>
+    <li class="indice">
+        <RouterLink to="/tetris">Juego Tetris</RouterLink> - Ultima versión del Juego Tetris de Manuel.best.
+      </li>
   </section>
 </template>
 
