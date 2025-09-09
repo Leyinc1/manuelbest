@@ -1,0 +1,346 @@
+<template>
+  <div class="tetris-container">
+    <h1>Tetris</h1>
+    <div class="game-area">
+      <canvas id="tetris-canvas" width="200" height="400"></canvas>
+      <div class="info-panel">
+        <div class="score">Score: {{ score }}</div>
+        <div class="next-piece">Next:</div>
+        <canvas id="next-piece-canvas" width="80" height="80"></canvas>
+        <button @click="startGame">Start Game</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'TetrisView',
+  data() {
+    return {
+      score: 0,
+      // Game state variables
+      canvas: null,
+      ctx: null,
+      nextCanvas: null,
+      nextCtx: null,
+      board: [],
+      currentPiece: null,
+      nextPiece: null,
+      blockSize: 20,
+      boardWidth: 10,
+      boardHeight: 20,
+      tetrominoes: {
+        'I': {
+          shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+          color: 'cyan',
+        },
+        'J': {
+          shape: [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
+          color: 'blue',
+        },
+        'L': {
+          shape: [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
+          color: 'orange',
+        },
+        'O': {
+          shape: [[1, 1], [1, 1]],
+          color: 'yellow',
+        },
+        'S': {
+          shape: [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
+          color: 'green',
+        },
+        'T': {
+          shape: [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
+          color: 'purple',
+        },
+        'Z': {
+          shape: [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+          color: 'red',
+        },
+      },
+      gameInterval: null,
+      dropInterval: 1000, // milliseconds
+    };
+  },
+  methods: {
+    startGame() {
+      this.initBoard();
+      this.score = 0;
+      this.currentPiece = this.getRandomPiece();
+      this.nextPiece = this.getRandomPiece();
+      this.draw();
+      this.drawNextPiece();
+      this.gameInterval = setInterval(this.dropPiece, this.dropInterval);
+      window.addEventListener('keydown', this.handleKeyPress);
+      console.log('Game started!');
+    },
+    initBoard() {
+      this.board = Array(this.boardHeight)
+        .fill(0)
+        .map(() => Array(this.boardWidth).fill(0));
+    },
+    getRandomPiece() {
+      const keys = Object.keys(this.tetrominoes);
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+      const piece = JSON.parse(JSON.stringify(this.tetrominoes[randomKey])); // Deep copy
+      piece.x = Math.floor(this.boardWidth / 2) - Math.floor(piece.shape[0].length / 2);
+      piece.y = 0;
+      return piece;
+    },
+    draw() {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      // Draw board
+      for (let row = 0; row < this.boardHeight; row++) {
+        for (let col = 0; col < this.boardWidth; col++) {
+          if (this.board[row][col]) {
+            this.drawBlock(col, row, this.board[row][col]);
+          }
+        }
+      }
+      // Draw current piece
+      if (this.currentPiece) {
+        for (let row = 0; row < this.currentPiece.shape.length; row++) {
+          for (let col = 0; col < this.currentPiece.shape[row].length; col++) {
+            if (this.currentPiece.shape[row][col]) {
+              this.drawBlock(
+                this.currentPiece.x + col,
+                this.currentPiece.y + row,
+                this.currentPiece.color
+              );
+            }
+          }
+        }
+      }
+    },
+    drawBlock(x, y, color) {
+      this.ctx.fillStyle = color;
+      this.ctx.fillRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
+      this.ctx.strokeStyle = 'black';
+      this.ctx.strokeRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
+    },
+    drawNextPiece() {
+      this.nextCtx.clearRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
+      if (this.nextPiece) {
+        const shape = this.nextPiece.shape;
+        const color = this.nextPiece.color;
+        for (let row = 0; row < shape.length; row++) {
+          for (let col = 0; col < shape[row].length; col++) {
+            if (shape[row][col]) {
+              this.nextCtx.fillStyle = color;
+              this.nextCtx.fillRect(
+                col * (this.blockSize / 2),
+                row * (this.blockSize / 2),
+                this.blockSize / 2,
+                this.blockSize / 2
+              );
+              this.nextCtx.strokeStyle = 'black';
+              this.nextCtx.strokeRect(
+                col * (this.blockSize / 2),
+                row * (this.blockSize / 2),
+                this.blockSize / 2,
+                this.blockSize / 2
+              );
+            }
+          }
+        }
+      }
+    },
+    isValidMove(newX, newY, newShape) {
+      for (let row = 0; row < newShape.length; row++) {
+        for (let col = 0; col < newShape[row].length; col++) {
+          if (newShape[row][col]) {
+            const boardX = newX + col;
+            const boardY = newY + row;
+            if (
+              boardX < 0 ||
+              boardX >= this.boardWidth ||
+              boardY >= this.boardHeight ||
+              (boardY >= 0 && this.board[boardY][boardX])
+            ) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    },
+    dropPiece() {
+      if (this.isValidMove(this.currentPiece.x, this.currentPiece.y + 1, this.currentPiece.shape)) {
+        this.currentPiece.y++;
+      } else {
+        this.lockPiece();
+        this.clearLines();
+        this.currentPiece = this.nextPiece;
+        this.nextPiece = this.getRandomPiece();
+        this.drawNextPiece();
+        if (!this.isValidMove(this.currentPiece.x, this.currentPiece.y, this.currentPiece.shape)) {
+          this.gameOver();
+          return;
+        }
+      }
+      this.draw();
+    },
+    lockPiece() {
+      for (let row = 0; row < this.currentPiece.shape.length; row++) {
+        for (let col = 0; col < this.currentPiece.shape[row].length; col++) {
+          if (this.currentPiece.shape[row][col]) {
+            const boardX = this.currentPiece.x + col;
+            const boardY = this.currentPiece.y + row;
+            if (boardY >= 0) {
+              this.board[boardY][boardX] = this.currentPiece.color;
+            }
+          }
+        }
+      }
+    },
+    clearLines() {
+      let linesCleared = 0;
+      for (let row = this.boardHeight - 1; row >= 0; row--) {
+        if (this.board[row].every((cell) => cell !== 0)) {
+          this.board.splice(row, 1);
+          this.board.unshift(Array(this.boardWidth).fill(0));
+          linesCleared++;
+          row++; // Check the new row at the same index
+        }
+      }
+      if (linesCleared > 0) {
+        this.score += linesCleared * 100; // Simple scoring
+      }
+    },
+    rotatePiece() {
+      const originalShape = this.currentPiece.shape;
+      const rotatedShape = originalShape[0].map((_, index) =>
+        originalShape.map((row) => row[originalShape.length - 1 - index])
+      );
+      if (this.isValidMove(this.currentPiece.x, this.currentPiece.y, rotatedShape)) {
+        this.currentPiece.shape = rotatedShape;
+      }
+      this.draw();
+    },
+    handleKeyPress(event) {
+      if (!this.currentPiece) return;
+
+      let newX = this.currentPiece.x;
+      let newY = this.currentPiece.y;
+      let newShape = this.currentPiece.shape;
+
+      switch (event.key) {
+        case 'ArrowLeft':
+          newX--;
+          break;
+        case 'ArrowRight':
+          newX++;
+          break;
+        case 'ArrowDown':
+          newY++;
+          break;
+        case 'ArrowUp':
+          this.rotatePiece();
+          return; // Rotation handles its own draw
+        default:
+          return;
+      }
+
+      if (this.isValidMove(newX, newY, newShape)) {
+        this.currentPiece.x = newX;
+        this.currentPiece.y = newY;
+      }
+      this.draw();
+    },
+    gameOver() {
+      clearInterval(this.gameInterval);
+      window.removeEventListener('keydown', this.handleKeyPress);
+      alert('Game Over! Your score: ' + this.score);
+      // Optionally reset game or show a restart button
+    },
+  },
+  mounted() {
+    this.canvas = document.getElementById('tetris-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.nextCanvas = document.getElementById('next-piece-canvas');
+    this.nextCtx = this.nextCanvas.getContext('2d');
+
+    // Set canvas dimensions based on block size and board dimensions
+    this.canvas.width = this.boardWidth * this.blockSize;
+    this.canvas.height = this.boardHeight * this.blockSize;
+
+    // Initial draw (empty board)
+    this.draw();
+  },
+  beforeUnmount() {
+    clearInterval(this.gameInterval);
+    window.removeEventListener('keydown', this.handleKeyPress);
+  },
+};
+</script>
+
+<style scoped>
+.tetris-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f0f0f0;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.game-area {
+  display: flex;
+  gap: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+#tetris-canvas {
+  border: 2px solid #333;
+  background-color: #000;
+  display: block;
+}
+
+.info-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.score,
+.next-piece {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #555;
+}
+
+#next-piece-canvas {
+  border: 1px solid #ccc;
+  background-color: #eee;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+</style>

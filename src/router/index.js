@@ -52,6 +52,11 @@ const router = createRouter({
       component: () => import('../views/CalendarioView.vue'),
     },
     // Añadiremos las rutas para Kanban y Calendario más adelante
+    {
+      path: '/tetris',
+      name: 'tetris',
+      component: () => import('../views/TetrisView.vue'),
+    },
   ],
 })
 
