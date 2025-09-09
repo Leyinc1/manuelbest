@@ -27,6 +27,8 @@ export default {
       board: [],
       currentPiece: null,
       nextPiece: null,
+      heldPiece: null, // Added for hold functionality
+      canHold: true, // Added to limit hold to once per turn
       blockSize: 20,
       boardWidth: 10,
       boardHeight: 20,
@@ -68,6 +70,8 @@ export default {
     startGame() {
       this.initBoard();
       this.score = 0;
+      this.heldPiece = null; // Reset held piece on new game
+      this.canHold = true; // Reset canHold on new game
       this.currentPiece = this.getRandomPiece();
       this.nextPiece = this.getRandomPiece();
       this.draw();
@@ -175,6 +179,7 @@ export default {
         this.currentPiece = this.nextPiece;
         this.nextPiece = this.getRandomPiece();
         this.drawNextPiece();
+        this.canHold = true; // Allow hold again after piece locks
         if (!this.isValidMove(this.currentPiece.x, this.currentPiece.y, this.currentPiece.shape)) {
           this.gameOver();
           return;
@@ -214,10 +219,52 @@ export default {
       const rotatedShape = originalShape[0].map((_, index) =>
         originalShape.map((row) => row[originalShape.length - 1 - index])
       );
+
+      // Try to rotate in place
       if (this.isValidMove(this.currentPiece.x, this.currentPiece.y, rotatedShape)) {
         this.currentPiece.shape = rotatedShape;
+      } else {
+        // Simple wall kick attempts
+        const kickOffsets = [-1, 1, -2, 2]; // Try moving left/right by 1 or 2 blocks
+        for (const offset of kickOffsets) {
+          if (this.isValidMove(this.currentPiece.x + offset, this.currentPiece.y, rotatedShape)) {
+            this.currentPiece.x += offset;
+            this.currentPiece.shape = rotatedShape;
+            break;
+          }
+        }
       }
       this.draw();
+    },
+    hardDrop() {
+      while (this.isValidMove(this.currentPiece.x, this.currentPiece.y + 1, this.currentPiece.shape)) {
+        this.currentPiece.y++;
+      }
+      this.dropPiece(); // This will lock the piece and handle next steps
+    },
+    holdPiece() {
+      if (!this.canHold) return;
+
+      clearInterval(this.gameInterval); // Pause game loop
+
+      if (this.heldPiece) {
+        // Swap current piece with held piece
+        const temp = this.currentPiece;
+        this.currentPiece = this.heldPiece;
+        this.heldPiece = temp;
+        // Reset position of the swapped piece
+        this.currentPiece.x = Math.floor(this.boardWidth / 2) - Math.floor(this.currentPiece.shape[0].length / 2);
+        this.currentPiece.y = 0;
+      } else {
+        // Hold current piece and get a new one
+        this.heldPiece = this.currentPiece;
+        this.currentPiece = this.nextPiece;
+        this.nextPiece = this.getRandomPiece();
+        this.drawNextPiece();
+      }
+      this.canHold = false; // Can only hold once per turn
+      this.draw();
+      this.gameInterval = setInterval(this.dropPiece, this.dropInterval); // Resume game loop
     },
     handleKeyPress(event) {
       if (!this.currentPiece) return;
@@ -229,16 +276,29 @@ export default {
       switch (event.key) {
         case 'ArrowLeft':
           newX--;
+          event.preventDefault(); // Prevent default scroll
           break;
         case 'ArrowRight':
           newX++;
+          event.preventDefault(); // Prevent default scroll
           break;
         case 'ArrowDown':
           newY++;
+          event.preventDefault(); // Prevent default scroll
           break;
         case 'ArrowUp':
           this.rotatePiece();
+          event.preventDefault(); // Prevent default scroll
           return; // Rotation handles its own draw
+        case ' ': // Spacebar for hard drop
+          this.hardDrop();
+          event.preventDefault();
+          return;
+        case 'c': // 'c' for hold
+        case 'C':
+          this.holdPiece();
+          event.preventDefault();
+          return;
         default:
           return;
       }
@@ -281,9 +341,10 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* Added for vertical centering */
   padding: 20px;
   background-color: #f0f0f0;
-  min-height: 100vh;
+  min-height: 100vh; /* Ensures it takes full viewport height */
 }
 
 h1 {
