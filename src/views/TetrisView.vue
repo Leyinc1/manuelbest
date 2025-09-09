@@ -315,6 +315,36 @@ export default {
       alert('Game Over! Your score: ' + this.score);
       // Optionally reset game or show a restart button
     },
+    resizeGame() {
+      const gameArea = this.$el.querySelector('.game-area');
+      if (!gameArea) return;
+
+      const availableWidth = gameArea.clientWidth - 40; // Subtract padding
+      const availableHeight = gameArea.clientHeight - 40; // Subtract padding
+
+      // Calculate blockSize based on available space and board dimensions
+      // We want to fit both the main board and leave space for the info panel
+      // Let's assume info panel takes about 150px width + gap
+      const maxBlockSizeX = (availableWidth - 150) / this.boardWidth;
+      const maxBlockSizeY = availableHeight / this.boardHeight;
+
+      this.blockSize = Math.floor(Math.min(maxBlockSizeX, maxBlockSizeY));
+
+      // Ensure a minimum block size
+      if (this.blockSize < 10) {
+        this.blockSize = 10;
+      }
+
+      this.canvas.width = this.boardWidth * this.blockSize;
+      this.canvas.height = this.boardHeight * this.blockSize;
+
+      // Adjust next piece canvas size
+      this.nextCanvas.width = 4 * (this.blockSize / 2);
+      this.nextCanvas.height = 4 * (this.blockSize / 2);
+
+      this.draw();
+      this.drawNextPiece();
+    },
   },
   mounted() {
     this.canvas = document.getElementById('tetris-canvas');
@@ -322,9 +352,9 @@ export default {
     this.nextCanvas = document.getElementById('next-piece-canvas');
     this.nextCtx = this.nextCanvas.getContext('2d');
 
-    // Set canvas dimensions based on block size and board dimensions
-    this.canvas.width = this.boardWidth * this.blockSize;
-    this.canvas.height = this.boardHeight * this.blockSize;
+    // Initial setup and resize
+    this.resizeGame();
+    window.addEventListener('resize', this.resizeGame);
 
     // Initial draw (empty board)
     this.draw();
@@ -332,6 +362,7 @@ export default {
   beforeUnmount() {
     clearInterval(this.gameInterval);
     window.removeEventListener('keydown', this.handleKeyPress);
+    window.removeEventListener('resize', this.resizeGame); // Remove resize listener
   },
 };
 </script>
@@ -359,6 +390,8 @@ h1 {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
+  flex-grow: 1; /* Allow it to grow and take available space */
+  min-height: 450px; /* Minimum height to ensure visibility */
 }
 
 #tetris-canvas {
