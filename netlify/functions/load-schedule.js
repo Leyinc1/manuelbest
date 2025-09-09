@@ -1,7 +1,8 @@
+ 
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
-exports.handler = async (event, context) => {
+exports.handler = async (event) => {
   const { authorization } = event.headers;
   if (!authorization) {
     return {
@@ -13,11 +14,13 @@ exports.handler = async (event, context) => {
   const token = authorization.split(' ')[1];
   let user;
   try {
-    user = jwt.decode(token);
+    // Verify the token signature using a secret key
+    user = jwt.verify(token, process.env.JWT_SECRET); // CRITICAL CHANGE: verify instead of decode
   } catch (error) {
+    console.error('JWT Verification Error:', error); // Log verification error
     return {
       statusCode: 401,
-      body: JSON.stringify({ error: 'Invalid token' }),
+      body: JSON.stringify({ error: 'Invalid or expired token' }), // More specific error
     };
   }
 
@@ -29,6 +32,10 @@ exports.handler = async (event, context) => {
   }
 
   const user_id = user.sub;
+  // Basic input validation for user_id
+  if (!user_id || typeof user_id !== 'string' || user_id.trim() === '') {
+    return { statusCode: 400, body: JSON.stringify({ error: 'ID de usuario inválido.' }) };
+  }
 
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -61,7 +68,7 @@ exports.handler = async (event, context) => {
     console.error('Error loading schedule:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to save schedule' }),
+      body: JSON.stringify({ error: error.message || 'Failed to save schedule' }),
     };
   } finally {
     client.release();

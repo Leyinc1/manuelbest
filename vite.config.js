@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
@@ -20,4 +20,8 @@ export default defineConfig({
     },
   },
   // --- FIN DE LA SECCIÓN AÑADIDA ---
+  test: {
+    environment: 'jsdom', // Simulate browser environment
+    globals: true, // Make Vitest APIs globally available
+  },
 })

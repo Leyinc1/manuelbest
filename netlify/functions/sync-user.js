@@ -18,6 +18,16 @@ exports.handler = async function(event, context) {
 
     try {
         const { sub: userId, email } = user;
+
+        // Basic input validation for userId and email
+        if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+            return { statusCode: 400, body: JSON.stringify({ error: 'ID de usuario inválido.' }) };
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Corrected regex
+        if (!email || !emailRegex.test(email)) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'Formato de email inválido.' }) }; // Corrected string
+        }
+
         const client = await pool.connect();
         try {
             // "INSERT ... ON CONFLICT DO NOTHING" es una forma segura y eficiente de insertar
@@ -37,7 +47,7 @@ exports.handler = async function(event, context) {
         console.error('Error en sync-user:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Error interno del servidor.' })
+            body: JSON.stringify({ error: error.message || 'Error interno del servidor.' })
         };
     }
 };

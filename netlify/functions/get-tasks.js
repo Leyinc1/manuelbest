@@ -22,10 +22,11 @@ exports.handler = async function (event, context) {
 
         // 2. VERIFICAR QUE EL projectId FUE ENVIADO
         const { projectId } = event.queryStringParameters;
-        if (!projectId) {
+        // Basic input validation for projectId
+        if (!projectId || typeof projectId !== 'string' || projectId.trim() === '') {
             return {
                 statusCode: 400, // Bad Request
-                body: JSON.stringify({ error: 'No se ha especificado un ID de proyecto.' }),
+                body: JSON.stringify({ error: 'ID de proyecto inválido.' }),
             };
         }
 
@@ -61,7 +62,7 @@ exports.handler = async function (event, context) {
         console.error('Error en la función get-tasks:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Error interno del servidor al obtener las tareas.' }),
+            body: JSON.stringify({ error: error.message || 'Error interno del servidor al obtener las tareas.' }),
         };
     }
 };

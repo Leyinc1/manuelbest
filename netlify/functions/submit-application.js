@@ -12,6 +12,27 @@ exports.handler = async (event) => {
     // Parsea los datos JSON enviados desde el formulario
     const data = JSON.parse(event.body);
 
+    // Input validation for form fields
+    if (!data.fullName || typeof data.fullName !== 'string' || data.fullName.trim() === '') {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Nombre completo inválido.' }) };
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Corrected regex
+    if (!data.email || !emailRegex.test(data.email)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Formato de correo electrónico inválido.' }) };
+    }
+    const allowedDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    if (!data.day || !allowedDays.includes(data.day)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Día de la semana inválido.' }) };
+    }
+    const allowedTimes = ['09:00-11:00', '11:00-13:00', '14:00-16:00', '16:00-18:00'];
+    if (!data.time || !allowedTimes.includes(data.time)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Hora inválida.' }) };
+    }
+    if (data.message && typeof data.message !== 'string' || data.message.length > 500) { // Example max length
+      return { statusCode: 400, body: JSON.stringify({ error: 'Mensaje demasiado largo.' }) };
+    }
+    // Phone is optional, no strict validation for now
+
     // Obtiene la función `sql` que se conecta automáticamente a la DB
     // usando la variable de entorno DATABASE_URL.
     const sql = neon();
@@ -34,7 +55,7 @@ exports.handler = async (event) => {
     console.error('Error al guardar en la base de datos:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'No se pudo guardar la solicitud.' }),
+      body: JSON.stringify({ error: error.message || 'No se pudo guardar la solicitud.' }),
     };
   }
 };

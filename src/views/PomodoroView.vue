@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 const defaultWorkMinutes = 25
 const defaultBreakMinutes = 5

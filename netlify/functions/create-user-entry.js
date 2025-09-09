@@ -8,12 +8,21 @@ const pool = new Pool({
     }
 });
 
-exports.handler = async function(event, context) {
+exports.handler = async function(event) {
     // Solo nos interesa el evento de registro exitoso
     if (event.body) {
         const payload = JSON.parse(event.body);
         if (payload.event === 'signup') {
             const { id, email } = payload.user;
+
+            // Basic input validation for id and email
+            if (!id || typeof id !== 'string' || id.trim() === '') {
+                return { statusCode: 400, body: JSON.stringify({ error: 'ID de usuario inválido.' }) };
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Corrected regex
+            if (!email || !emailRegex.test(email)) {
+                return { statusCode: 400, body: JSON.stringify({ error: "Formato de email inválido." }) }; // Corrected string
+            }
 
             try {
                 const client = await pool.connect();
@@ -33,7 +42,7 @@ exports.handler = async function(event, context) {
                 console.error('Error al registrar usuario en la DB:', error);
                 return {
                     statusCode: 500,
-                    body: JSON.stringify({ error: 'Error interno del servidor.' })
+                    body: JSON.stringify({ error: error.message || 'Error interno del servidor.' })
                 };
             }
         }

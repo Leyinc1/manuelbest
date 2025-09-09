@@ -9,6 +9,12 @@ exports.handler = async function (event, context) {
     }
 
     const { name } = JSON.parse(event.body);
+
+    // Basic input validation for name
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+        return { statusCode: 400, body: JSON.stringify({ error: 'El nombre del proyecto no puede estar vacío.' }) };
+    }
+
     const connectionString = process.env.DATABASE_URL;
     const pool = new Pool({ connectionString });
     const client = await pool.connect();
@@ -34,7 +40,7 @@ exports.handler = async function (event, context) {
     } catch (error) {
         await client.query('ROLLBACK'); // Revertir en caso de error
         console.error(error);
-        return { statusCode: 500, body: JSON.stringify({ error: 'Falló la creación del proyecto.' }) };
+        return { statusCode: 500, body: JSON.stringify({ error: error.message || 'Falló la creación del proyecto.' }) };
     } finally {
         client.release();
         await pool.end();

@@ -26,8 +26,9 @@ exports.handler = async (event, context) => {
 
     try {
         const { id } = event.queryStringParameters;
-        if (!id) {
-            return { statusCode: 400, body: 'Falta el parámetro "id" en la URL.' };
+        // Basic input validation for id
+        if (!id || typeof id !== 'string' || id.trim() === '') {
+            return { statusCode: 400, body: JSON.stringify({ error: 'ID de tarea inválido.' }) };
         }
 
         // 2. OBTENER EL project_id DE LA TAREA

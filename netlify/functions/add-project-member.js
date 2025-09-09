@@ -17,6 +17,16 @@ exports.handler = async function (event, context) {
 
     const { projectId, newUserEmail } = JSON.parse(event.body);
 
+    // Basic input validation
+    if (!projectId || typeof projectId !== 'string' || projectId.trim() === '') {
+        return { statusCode: 400, body: JSON.stringify({ error: 'ID de proyecto inválido.' }) };
+    }
+    // Simple email regex for basic validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newUserEmail || !emailRegex.test(newUserEmail)) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Formato de email inválido.' }) };
+    }
+
     // No permitir que alguien se invite a sí mismo
     if (inviter.email === newUserEmail) {
         return { statusCode: 400, body: JSON.stringify({ error: 'No puedes invitarte a ti mismo.' }) };
@@ -51,7 +61,7 @@ exports.handler = async function (event, context) {
         if (error.code === '23505') { // Código de error para violación de llave única en PostgreSQL
             return { statusCode: 409, body: JSON.stringify({ error: 'Este usuario ya es miembro del proyecto.' }) };
         }
-        return { statusCode: 500, body: JSON.stringify({ error: 'No se pudo añadir al miembro.' }) };
+        return { statusCode: 500, body: JSON.stringify({ error: error.message || 'No se pudo añadir al miembro.' }) };
     } finally {
         client.release();
     }

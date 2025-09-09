@@ -32,9 +32,21 @@ export default defineConfig([
       sourceType: 'commonjs', // Netlify functions often use CommonJS modules
     },
     rules: {
+      'no-unused-vars': 'off', // Disable no-unused-vars for Netlify functions
       // You might want to add specific rules for Node.js environment here
       // For example, if you want to disallow console.log in production
       // 'no-console': 'warn',
+    },
+  },
+
+  // Configuration for Vitest test files
+  {
+    name: 'vitest/tests',
+    files: ['**/*.test.js'],
+    languageOptions: {
+      globals: {
+        ...globals.vitest, // Add Vitest globals (describe, it, expect, vi, etc.)
+      },
     },
   },
 
