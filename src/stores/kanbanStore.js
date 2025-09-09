@@ -59,6 +59,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     }
 
     tasks.value.forEach((task) => {
+      console.log(`Processing task ID: ${task.id}, Status: ${task.status}`); // Added log
       const status = task.status || 'todo' // Si el estado es nulo o indefinido, se asigna a 'todo'
       if (categorizedTasks[status]) {
         categorizedTasks[status].push(task)
