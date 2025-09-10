@@ -1,5 +1,6 @@
 // netlify/functions/add-project-member.js
 const { Pool } = require('pg');
+const fetch = require('node-fetch');
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -43,16 +44,29 @@ exports.handler = async function (event, context) {
         }
 
         // 3. Buscar el ID del usuario invitado en nuestra tabla `users` usando su email
-        const allUsersQuery = 'SELECT email FROM users';
-        const allUsersResult = await client.query(allUsersQuery);
-        console.log('All users in DB:', allUsersResult.rows.map(u => u.email));
+        let userSearchResult = await client.query('SELECT id FROM users WHERE LOWER(email) = LOWER($1)', [newUserEmail.trim()]);
 
-        console.log(`Searching for user with email: ${newUserEmail.trim().toLowerCase()}`);
-        const userSearchQuery = 'SELECT id FROM users WHERE LOWER(email) = LOWER($1)';
-        const userSearchResult = await client.query(userSearchQuery, [newUserEmail.trim()]);
         if (userSearchResult.rowCount === 0) {
-            return { statusCode: 404, body: JSON.stringify({ error: 'El usuario con ese email no existe. Pídele que se registre primero.' }) };
+            // Si el usuario no existe en la DB, búscalo en Netlify Identity
+            const response = await fetch(`${process.env.URL}/.netlify/functions/get-user-by-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${context.clientContext.identity.token}`,
+                },
+                body: JSON.stringify({ email: newUserEmail.trim() }),
+            });
+
+            if (response.ok) {
+                const identityUser = await response.json();
+                // Inserta el usuario de Identity en tu tabla `users`
+                await client.query('INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [identityUser.id, identityUser.email]);
+                userSearchResult = await client.query('SELECT id FROM users WHERE id = $1', [identityUser.id]);
+            } else {
+                return { statusCode: 404, body: JSON.stringify({ error: 'El usuario con ese email no existe. Pídele que se registre primero.' }) };
+            }
         }
+
         const invitedUserId = userSearchResult.rows[0].id;
 
         // 4. Insertar la nueva membresía en `project_members`
