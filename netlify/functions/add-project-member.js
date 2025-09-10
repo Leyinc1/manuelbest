@@ -43,6 +43,10 @@ exports.handler = async function (event, context) {
         }
 
         // 3. Buscar el ID del usuario invitado en nuestra tabla `users` usando su email
+        const allUsersQuery = 'SELECT email FROM users';
+        const allUsersResult = await client.query(allUsersQuery);
+        console.log('All users in DB:', allUsersResult.rows.map(u => u.email));
+
         console.log(`Searching for user with email: ${newUserEmail.trim().toLowerCase()}`);
         const userSearchQuery = 'SELECT id FROM users WHERE LOWER(email) = LOWER($1)';
         const userSearchResult = await client.query(userSearchQuery, [newUserEmail.trim()]);
