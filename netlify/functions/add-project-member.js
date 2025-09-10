@@ -1,6 +1,6 @@
 // netlify/functions/add-project-member.js
 const { Pool } = require('pg');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
