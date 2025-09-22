@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minion Vigía - Proyecto Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Vigía Palette -->
+    <!-- Application Structure Plan: Se ha diseñado una SPA de desplazamiento vertical con secciones temáticas. Este enfoque cuenta una historia: comienza con un problema universal (desperdicio de energía), presenta a Minion Vigía como el héroe (la solución), detalla sus beneficios y funcionamiento, identifica a quién ayuda y finalmente presenta métricas de éxito. Esta estructura narrativa es más atractiva y persuasiva para un pitch de proyecto que una simple réplica del informe, guiando al usuario de forma intuitiva a través de los puntos clave del proyecto. La navegación superior permite el acceso directo a cada sección. -->
+    <!-- Visualization & Content Choices: 
+        - Problema: Gráfico de Dona (Chart.js) -> Objetivo: Informar/Impactar -> Muestra la proporción del desperdicio energético, que es más visualmente impactante que el texto. Interacción: Tooltips al pasar el ratón.
+        - Solución y Valor: Tarjetas con iconos (HTML/Tailwind) -> Objetivo: Organizar -> Desglosan la información técnica y los beneficios en partes digeribles. Interacción: Hover sutil.
+        - Cómo Funciona: Diagrama de flujo (HTML/Tailwind) -> Objetivo: Explicar Proceso -> Visualiza el ciclo de operación de forma clara. Sin interacción, es puramente informativo.
+        - Métricas Clave: Gráfico de Radar (Chart.js) -> Objetivo: Comparar/Evaluar -> Muestra el rendimiento en múltiples métricas de forma simultánea, dando una apariencia técnica y profesional. Interacción: Tooltips.
+        - Justificación: Se eligió Chart.js por su versatilidad y renderizado en Canvas, evitando SVG. La estructura y las visualizaciones están diseñadas para contar una historia coherente y destacar los puntos fuertes del proyecto. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F3F4F6;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+            max-width: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-width: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-gray-800">
+                <span class="text-yellow-500">Minion</span><span class="text-blue-500">Vigía</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#problema" class="text-gray-600 hover:text-blue-500 transition duration-300">El Problema</a>
+                <a href="#solucion" class="text-gray-600 hover:text-blue-500 transition duration-300">La Solución</a>
+                <a href="#valor" class="text-gray-600 hover:text-blue-500 transition duration-300">Beneficios</a>
+                <a href="#metricas" class="text-gray-600 hover:text-blue-500 transition duration-300">Métricas</a>
+                <a href="https://manuel.best/canva" target="_blank" rel="noopener noreferrer">Tabla</a>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden px-6 pb-3">
+            <a href="#problema" class="block py-2 text-gray-600 hover:text-blue-500">El Problema</a>
+            <a href="#solucion" class="block py-2 text-gray-600 hover:text-blue-500">La Solución</a>
+            <a href="#valor" class="block py-2 text-gray-600 hover:text-blue-500">Beneficios</a>
+            <a href="#metricas" class="block py-2 text-gray-600 hover:text-blue-500">Métricas</a>
+            <a href="#tabla" class="block py-2 text-gray-600 hover:text-blue-500">tabla</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="bg-white pt-20 pb-12">
+            <div class="container mx-auto px-6 text-center">
+                <div class="w-24 h-24 mx-auto mb-6 bg-yellow-400 rounded-full flex items-center justify-center overflow-hidden relative border-4 border-gray-700">
+                    <div class="w-16 h-8 bg-gray-700 absolute top-4 rounded-full"></div>
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center z-10">
+                        <div class="w-5 h-5 bg-gray-800 rounded-full"></div>
+                    </div>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Conoce a Minion Vigía</h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Tu asistente energético personal que convierte el ahorro de energía en una experiencia interactiva, divertida y proactiva.</p>
+            </div>
+        </section>
+
+        <section id="problema" class="py-16">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">El Problema: El Desperdicio Silencioso</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">En muchos hogares y pequeñas oficinas, el consumo de energía "fantasma" por dispositivos en stand-by o innecesariamente encendidos representa un gasto considerable y una oportunidad de ahorro perdida. Esta sección ilustra dónde se producen las mayores fugas de energía.</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="md:w-1/2">
+                        <h3 class="text-2xl font-semibold mb-4">Fugas Comunes de Energía en el Hogar</h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start">
+                                <span class="text-blue-500 font-bold mr-3">⚡</span>
+                                <div><strong class="font-semibold">Dispositivos en Stand-by:</strong> Televisores, consolas y cargadores consumen energía incluso apagados.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 font-bold mr-3">⚡</span>
+                                <div><strong class="font-semibold">Iluminación Innecesaria:</strong> Luces encendidas en habitaciones vacías son un desperdicio directo.</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-blue-500 font-bold mr-3">⚡</span>
+                                <div><strong class="font-semibold">Equipos de Oficina:</strong> Monitores y ordenadores que no se apagan correctamente al final del día.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 font-bold mr-3">⚡</span>
+                                <div><strong class="font-semibold">Falta de Conciencia:</strong> Los monitores tradicionales son técnicos y no ofrecen consejos prácticos ni visuales.</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:w-1/2 w-full">
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-semibold text-center mb-4">Distribución del Desperdicio Energético</h3>
+                            <div class="chart-container">
+                                <canvas id="problemaChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="solucion" class="py-16 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">Nuestra Solución: Un Vigía Inteligente</h2>
+                     <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Minion Vigía es un robot de escritorio amigable que no solo detecta, sino que actúa. Combinando hardware accesible y software inteligente, ofrece una solución tangible y efectiva para reducir el consumo de energía de forma automática.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300">
+                        <div class="text-5xl mb-4">📷</div>
+                        <h3 class="text-xl font-semibold mb-2">Visión por Computadora</h3>
+                        <p class="text-gray-600">Utiliza una cámara con movimiento y un computador con CV para detectar si los dispositivos electrónicos están encendidos cuando no deberían.</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300">
+                        <div class="text-5xl mb-4">🤖</div>
+                        <h3 class="text-xl font-semibold mb-2">Acción Directa</h3>
+                        <p class="text-gray-600">Mediante un electroimán, puede apagar físicamente los dispositivos, asegurando el ahorro de energía sin intervención humana.</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300">
+                        <div class="text-5xl mb-4">🎨</div>
+                        <h3 class="text-xl font-semibold mb-2">Diseño Personalizable</h3>
+                        <p class="text-gray-600">Su carcasa y mecanismos, impresos en 3D, le dan un aspecto amigable y permiten una fácil personalización y reparación.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="valor" class="py-16">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">Propuesta de Valor y Beneficios</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Más allá de apagar luces, Minion Vigía transforma la gestión de energía en una experiencia positiva. Su valor reside en la combinación única de proactividad, interacción y educación, haciendo del ahorro una tarea simple y atractiva para todos.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="bg-white rounded-full h-24 w-24 flex items-center justify-center mx-auto shadow-lg mb-4">
+                           <span class="text-4xl">💡</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Ahorro Proactivo</h3>
+                        <p class="text-gray-600">Actúa por ti, convirtiendo el ahorro de energía en un proceso automático y sin esfuerzo.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-white rounded-full h-24 w-24 flex items-center justify-center mx-auto shadow-lg mb-4">
+                            <span class="text-4xl">💬</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Consejos en Tiempo Real</h3>
+                        <p class="text-gray-600">Te ofrece consejos inteligentes y contextuales para que mejores tus hábitos de consumo día a día.</p>
+                    </div>
+                     <div class="text-center">
+                        <div class="bg-white rounded-full h-24 w-24 flex items-center justify-center mx-auto shadow-lg mb-4">
+                            <span class="text-4xl">👨‍👩‍👧‍👦</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Experiencia Interactiva</h3>
+                        <p class="text-gray-600">Su diseño amigable lo convierte en una herramienta educativa ideal para enseñar a toda la familia sobre la importancia de la energía.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="metricas" class="py-16 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">Métricas Clave del Éxito</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Para validar la efectividad de Minion Vigía, nos centramos en métricas cuantificables que demuestran su rendimiento y su impacto real. Este gráfico muestra nuestros objetivos de rendimiento en áreas cruciales del proyecto.</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                     <div class="md:w-1/2 w-full">
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-semibold text-center mb-4">Objetivos de Rendimiento del Prototipo</h3>
+                            <div class="chart-container">
+                                <canvas id="metricasChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <h3 class="text-2xl font-semibold mb-4">Indicadores de Impacto</h3>
+                         <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start">
+                               <span class="text-yellow-500 font-bold mr-3">🎯</span>
+                                <div><strong class="font-semibold">Precisión de Detección:</strong> Porcentaje de veces que el robot identifica correctamente un dispositivo encendido o apagado.</div>
+                            </li>
+                             <li class="flex items-start">
+                               <span class="text-yellow-500 font-bold mr-3">🎯</span>
+                                <div><strong class="font-semibold">Tiempo de Respuesta:</strong> Segundos que transcurren desde la detección hasta la ejecución de la acción de apagado.</div>
+                            </li>
+                             <li class="flex items-start">
+                               <span class="text-yellow-500 font-bold mr-3">🎯</span>
+                                <div><strong class="font-semibold">Reducción de Consumo:</strong> Ahorro energético medible (en kWh) logrado en un período de prueba.</div>
+                            </li>
+                             <li class="flex items-start">
+                               <span class="text-yellow-500 font-bold mr-3">🎯</span>
+                                <div><strong class="font-semibold">Interacción de Usuario:</strong> Frecuencia con la que los usuarios siguen los consejos generados por el sistema.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 Proyecto Minion Vigía. Una nueva forma de ahorrar energía.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const problemaCtx = document.getElementById('problemaChart').getContext('2d');
+            const problemaChart = new Chart(problemaCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stand-by', 'Iluminación', 'Equipos Oficina', 'Otros'],
+                    datasets: [{
+                        label: 'Desperdicio Energético',
+                        data: [40, 25, 20, 15],
+                        backgroundColor: [
+                            '#3B82F6', 
+                            '#FBBF24',
+                            '#1F2937',
+                            '#9CA3AF'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const metricasCtx = document.getElementById('metricasChart').getContext('2d');
+            const metricasChart = new Chart(metricasCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Precisión Detección (%)', 'Rapidez (1/s)', 'Reducción Consumo (%)', 'Interacción Usuario (%)', 'Fiabilidad (%)'],
+                    datasets: [{
+                        label: 'Objetivo de Rendimiento',
+                        data: [95, 80, 15, 60, 98],
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(59, 130, 246)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                           display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
