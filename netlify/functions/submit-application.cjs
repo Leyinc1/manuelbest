@@ -39,22 +39,46 @@ exports.handler = async (event) => {
     }
 
     // Obtiene la función `sql` que se conecta automáticamente a la DB
-    // usando la variable de entorno DATABASE_URL.
     const sql = neon();
 
-    // Itera sobre los miembros y los inserta en la base de datos.
-    // Se asume que la tabla `applications` ahora almacenará registros de miembros.
-    for (const member of data.members) {
-      await sql`
-        INSERT INTO applications (full_name, email, phone, mensaje)
-        VALUES (${member.fullName}, ${member.email}, ${member.studentId}, ${`Equipo: ${data.teamName}. Mensaje: ${data.message}`});
+    // Se utiliza una transacción para asegurar que el equipo y sus miembros se creen juntos.
+    try {
+      // Inicia la transacción
+      await sql`BEGIN`;
+
+      // 1. Inserta el equipo en la tabla `teams` y recupera el ID generado.
+      const result = await sql`
+        INSERT INTO teams (name, message)
+        VALUES (${data.teamName}, ${data.message})
+        RETURNING id;
       `;
+      const teamId = result[0].id;
+
+      // 2. Itera sobre los miembros y los inserta en la tabla `members`.
+      for (let i = 0; i < data.members.length; i++) {
+        const member = data.members[i];
+        const isLeader = (i === 0); // El primer miembro del array se considera el líder.
+
+        await sql`
+          INSERT INTO members (team_id, student_id, full_name, email, is_leader)
+          VALUES (${teamId}, ${member.studentId}, ${member.fullName}, ${member.email}, ${isLeader});
+        `;
+      }
+
+      // 3. Si todo ha ido bien, confirma los cambios en la base de datos.
+      await sql`COMMIT`;
+
+    } catch (transactionError) {
+      // 4. Si ocurre cualquier error durante la transacción, la revierte.
+      await sql`ROLLBACK`;
+      // Y relanza el error para que sea capturado por el bloque catch principal.
+      throw transactionError;
     }
 
     // Devuelve una respuesta de éxito al frontend
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Solicitud guardada exitosamente' }),
+      body: JSON.stringify({ message: 'Equipo inscrito exitosamente' }),
     };
 
   } catch (error) {
