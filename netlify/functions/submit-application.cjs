@@ -13,36 +13,43 @@ exports.handler = async (event) => {
     const data = JSON.parse(event.body);
 
     // Input validation for form fields
-    if (!data.fullName || typeof data.fullName !== 'string' || data.fullName.trim() === '') {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Nombre completo inválido.' }) };
+    if (!data.teamName || typeof data.teamName !== 'string' || data.teamName.trim() === '') {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Nombre de equipo inválido.' }) };
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Corrected regex
-    if (!data.email || !emailRegex.test(data.email)) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Formato de correo electrónico inválido.' }) };
+
+    if (!data.members || !Array.isArray(data.members) || data.members.length < 2 || data.members.length > 3) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'El equipo debe tener entre 2 y 3 integrantes.' }) };
     }
-    const allowedDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
-    if (!data.day || !allowedDays.includes(data.day)) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Día de la semana inválido.' }) };
+
+    for (const member of data.members) {
+      if (!member.studentId || typeof member.studentId !== 'string' || member.studentId.trim() === '') {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Código de estudiante inválido.' }) };
+      }
+      if (!member.fullName || typeof member.fullName !== 'string' || member.fullName.trim() === '') {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Nombre completo de integrante inválido.' }) };
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!member.email || !emailRegex.test(member.email)) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Formato de correo electrónico de integrante inválido.' }) };
+      }
     }
-    const allowedTimes = ['09:00-11:00', '11:00-13:00', '14:00-16:00', '16:00-18:00'];
-    if (!data.time || !allowedTimes.includes(data.time)) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Hora inválida.' }) };
-    }
-    if (data.message && typeof data.message !== 'string' || data.message.length > 500) { // Example max length
+
+    if (data.message && (typeof data.message !== 'string' || data.message.length > 1000)) { // Example max length
       return { statusCode: 400, body: JSON.stringify({ error: 'Mensaje demasiado largo.' }) };
     }
-    // Phone is optional, no strict validation for now
 
     // Obtiene la función `sql` que se conecta automáticamente a la DB
     // usando la variable de entorno DATABASE_URL.
     const sql = neon();
 
-    // Define y ejecuta la consulta usando "tagged templates".
-    // Esto previene inyecciones SQL de forma automática.
-    await sql`
-      INSERT INTO applications (full_name, email, phone, dia, hora, mensaje)
-      VALUES (${data.fullName}, ${data.email}, ${data.phone}, ${data.day}, ${data.time}, ${data.message});
-    `;
+    // Itera sobre los miembros y los inserta en la base de datos.
+    // Se asume que la tabla `applications` ahora almacenará registros de miembros.
+    for (const member of data.members) {
+      await sql`
+        INSERT INTO applications (full_name, email, phone, mensaje)
+        VALUES (${member.fullName}, ${member.email}, ${member.studentId}, ${`Equipo: ${data.teamName}. Mensaje: ${data.message}`});
+      `;
+    }
 
     // Devuelve una respuesta de éxito al frontend
     return {

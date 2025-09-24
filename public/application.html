@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Inscripción - Torneo de Desarrollo</title>
+    <title>Registro de Equipos - Torneo de Desarrollo</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -41,74 +41,96 @@
         <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
             <!-- Encabezado del formulario -->
             <div class="p-8 bg-blue-600 text-white">
-                <h1 class="text-3xl md:text-4xl font-bold">Inscribete en el Primer Torneo de Desarrollo y Programación</h1>
-                <p class="mt-2 text-blue-100">Buscamos Estudiantes apasionados por la tecnología y desarrollo.</p>
+                <h1 class="text-3xl md:text-4xl font-bold">Registro de Equipos para el Torneo de Desarrollo</h1>
+                <p class="mt-2 text-blue-100">Inscribe a tu equipo para participar. Equipos de 2 a 3 integrantes.</p>
             </div>
 
             <!-- Formulario -->
             <form id="applicationForm" class="p-8 space-y-8">
-                <!-- Sección 1: Información Personal -->
+                <!-- Sección 1: Información del Equipo -->
                 <fieldset>
-                    <legend class="text-xl font-semibold text-gray-700 border-b border-gray-200 pb-2 mb-6">1. Información Personal</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="fullName" class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
-                            <input type="text" id="fullName" name="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Ana Torres" required>
+                    <legend class="text-xl font-semibold text-gray-700 border-b border-gray-200 pb-2 mb-6">1. Información del Equipo</legend>
+                    <div>
+                        <label for="teamName" class="block text-sm font-medium text-gray-600 mb-1">Nombre del Equipo</label>
+                        <input type="text" id="teamName" name="teamName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Los Compiladores" required>
+                    </div>
+                </fieldset>
+
+                <!-- Sección 2: Integrantes del Equipo -->
+                <fieldset>
+                    <legend class="text-xl font-semibold text-gray-700 border-b border-gray-200 pb-2 mb-6">2. Integrantes del Equipo</legend>
+                    
+                    <!-- Integrante 1 (Líder) -->
+                    <div class="space-y-6 bg-gray-50 p-6 rounded-lg mb-6">
+                        <h3 class="text-lg font-medium text-gray-800">Integrante 1 (Líder del equipo)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="studentId1" class="block text-sm font-medium text-gray-600 mb-1">Código de Estudiante</label>
+                                <input type="text" id="studentId1" name="studentId1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: U20240001" required>
+                            </div>
+                            <div>
+                                <label for="fullName1" class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
+                                <input type="text" id="fullName1" name="fullName1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Ana Torres" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="email1" class="block text-sm font-medium text-gray-600 mb-1">Correo Electrónico (institucional)</label>
+                                <input type="email" id="email1" name="email1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="codigo@ue.edu.pe" required>
+                            </div>
                         </div>
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-600 mb-1">Correo Electrónico (institucional)</label>
-                            <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="codigo@ue.edu.pe" required>
+                    </div>
+
+                    <!-- Integrante 2 -->
+                    <div class="space-y-6 bg-gray-50 p-6 rounded-lg mb-6">
+                        <h3 class="text-lg font-medium text-gray-800">Integrante 2</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="studentId2" class="block text-sm font-medium text-gray-600 mb-1">Código de Estudiante</label>
+                                <input type="text" id="studentId2" name="studentId2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: U20240002" required>
+                            </div>
+                            <div>
+                                <label for="fullName2" class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
+                                <input type="text" id="fullName2" name="fullName2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Juan Pérez" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="email2" class="block text-sm font-medium text-gray-600 mb-1">Correo Electrónico (institucional)</label>
+                                <input type="email" id="email2" name="email2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="codigo@ue.edu.pe" required>
+                            </div>
                         </div>
-                        <div class="md:col-span-2">
-                            <label for="phone" class="block text-sm font-medium text-gray-600 mb-1">Teléfono</label>
-                            <input type="tel" id="phone" name="phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="+51 987 654 321">
+                    </div>
+
+                    <!-- Integrante 3 (Opcional) -->
+                    <div class="space-y-6 bg-gray-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-800">Integrante 3 (Opcional)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="studentId3" class="block text-sm font-medium text-gray-600 mb-1">Código de Estudiante</label>
+                                <input type="text" id="studentId3" name="studentId3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: U20240003">
+                            </div>
+                            <div>
+                                <label for="fullName3" class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
+                                <input type="text" id="fullName3" name="fullName3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Sofía Luna">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="email3" class="block text-sm font-medium text-gray-600 mb-1">Correo Electrónico (institucional)</label>
+                                <input type="email" id="email3" name="email3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="codigo@ue.edu.pe">
+                            </div>
                         </div>
                     </div>
                 </fieldset>
                 
-                <!-- Sección 2: Fecha de Preferencia -->
-                <fieldset>
-                    <legend class="text-xl font-semibold text-gray-700 border-b border-gray-200 pb-2 mb-6">2. Fecha de preferencia</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="day" class="block text-sm font-medium text-gray-600 mb-1">Día de la semana</label>
-                            <select id="day" name="day" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
-                                <option value="" disabled selected>Selecciona un día</option>
-                                <option value="lunes">Lunes</option>
-                                <option value="martes">Martes</option>
-                                <option value="miercoles">Miércoles</option>
-                                <option value="jueves">Jueves</option>
-                                <option value="viernes">Viernes</option>
-                                <option value="sabado">Sábado</option>
-                                <option value="domingo">Domingo</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="time" class="block text-sm font-medium text-gray-600 mb-1">Hora libre</label>
-                            <select id="time" name="time" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
-                                <option value="" disabled selected>Selecciona una hora</option>
-                                <option value="09:00-11:00">09:00 - 11:00</option>
-                                <option value="11:00-13:00">11:00 - 13:00</option>
-                                <option value="14:00-16:00">14:00 - 16:00</option>
-                                <option value="16:00-18:00">16:00 - 18:00</option>
-                            </select>
-                        </div>
-                    </div>
-                </fieldset>
-
                 <!-- Sección 3: Mensaje Adicional -->
                 <fieldset>
                     <legend class="text-xl font-semibold text-gray-700 border-b border-gray-200 pb-2 mb-6">3. Mensaje Adicional</legend>
                     <div>
-                        <label for="message" class="block text-sm font-medium text-gray-600 mb-1">¿Por qué te gustaría unirte al torneo?</label>
-                        <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Cuéntanos un poco sobre ti, tus intereses y qué te motiva..."></textarea>
+                        <label for="message" class="block text-sm font-medium text-gray-600 mb-1">¿Por qué su equipo quiere unirse al torneo?</label>
+                        <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Cuéntanos un poco sobre su equipo, sus intereses y qué los motiva..."></textarea>
                     </div>
                 </fieldset>
 
                 <!-- Botón de Envío -->
                 <div class="flex justify-end pt-4">
                     <button id="submitButton" type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center">
-                        Enviar Solicitud
+                        Inscribir Equipo
                     </button>
                 </div>
             </form>
@@ -122,15 +144,15 @@
     <!-- Modals (Éxito y Error) -->
     <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm mx-4">
-            <h2 class="text-2xl font-bold text-green-600 mb-4">¡Solicitud Enviada!</h2>
-            <p class="text-gray-700 mb-6">Gracias por tu interés. Hemos recibido tu solicitud.</p>
+            <h2 class="text-2xl font-bold text-green-600 mb-4">¡Equipo Inscrito!</h2>
+            <p class="text-gray-700 mb-6">Gracias por su interés. Hemos recibido la inscripción de su equipo.</p>
             <button onclick="closeModal('successModal')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">Entendido</button>
         </div>
     </div>
     <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm mx-4">
-            <h2 class="text-2xl font-bold text-red-600 mb-4">Error al Enviar</h2>
-            <p class="text-gray-700 mb-6">Lo sentimos, ha ocurrido un problema. Por favor, inténtalo de nuevo más tarde.</p>
+            <h2 class="text-2xl font-bold text-red-600 mb-4">Error al Inscribir</h2>
+            <p class="text-gray-700 mb-6">Lo sentimos, ha ocurrido un problema. Por favor, verifiquen los datos e inténtenlo de nuevo más tarde.</p>
             <button onclick="closeModal('errorModal')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">Cerrar</button>
         </div>
     </div>
@@ -151,17 +173,24 @@
 
             // Recopilar datos del formulario
             const formData = new FormData(form);
+            const members = [];
+
+            // Recopilar datos de los integrantes
+            for (let i = 1; i <= 3; i++) {
+                const studentId = formData.get(`studentId${i}`);
+                const fullName = formData.get(`fullName${i}`);
+                const email = formData.get(`email${i}`);
+
+                // Añadir al integrante solo si los campos principales no están vacíos
+                if (studentId && fullName && email) {
+                    members.push({ studentId, fullName, email });
+                }
+            }
+
             const data = {
-                // Los nombres de las propiedades (ej: fullName) deben coincidir
-                // con los nombres de las columnas en tu base de datos.
-                fullName: formData.get('fullName'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                day: formData.get('day'),
-                time: formData.get('time'),
+                teamName: formData.get('teamName'),
                 message: formData.get('message'),
-                // Se añade la fecha de registro automáticamente
-                
+                members: members,
             };
 
             try {
@@ -190,7 +219,7 @@
                 // Restaura el botón a su estado original
                 submitButton.disabled = false;
                 submitButton.classList.remove('button-loading');
-                submitButton.innerHTML = 'Enviar Solicitud';
+                submitButton.innerHTML = 'Inscribir Equipo';
             }
         });
 
