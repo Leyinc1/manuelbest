@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen Interactivo del Proyecto SGCW</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Corporate Calm -->
+    <!-- Application Structure Plan: He diseñado la aplicación como un panel de control interactivo con navegación superior. Las secciones son: Inicio (resumen), Alcance (detalles de módulos), Requisitos (tabla filtrable y gráfico), Actores/Casos de Uso (diagrama interactivo), y Fases (línea de tiempo). Esta estructura descompone el documento técnico en segmentos lógicos y digeribles, permitiendo al usuario explorar el proyecto por temas en lugar de seguir la estructura lineal del documento original. La interactividad, como los filtros y los modales, facilita la profundización en los detalles sin abrumar la vista principal, mejorando la usabilidad y la comprensión del proyecto. -->
+    <!-- Visualization & Content Choices: 
+        - Resumen del Proyecto -> Informar -> Tarjetas de texto con iconos -> Estático -> Claridad y resumen visual -> HTML/Tailwind.
+        - Alcance del sistema -> Organizar -> Columnas con listas detalladas -> Estático -> Separación clara de funcionalidades -> HTML/Tailwind.
+        - Matriz de Requisitos -> Organizar/Comparar -> Tabla con botones de filtro y un gráfico de dona -> Interactivo (filtrado) -> Permite analizar los requisitos por prioridad y tipo, y el gráfico ofrece un resumen visual rápido de la distribución de prioridades -> Chart.js/Canvas para el gráfico, JS para el filtrado.
+        - Actores y Casos de Uso -> Organizar/Relacionar -> Diagrama de nodos interactivo -> Interactivo (clic para ver detalles en modal) -> Transforma el diagrama estático del PDF en una experiencia explorable que revela información detallada bajo demanda, manteniendo la interfaz limpia -> HTML/Tailwind/JS.
+        - Fases del Proyecto -> Mostrar Proceso -> Stepper/Línea de tiempo horizontal -> Estático -> Visualización clara y secuencial del ciclo de vida del proyecto -> HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #0d6efd;
+            border-bottom-color: #0d6efd;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 2rem;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 0.75rem;
+        }
+        .actor-card {
+            cursor: pointer;
+        }
+        .use-case-node {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .use-case-node:hover {
+            transform: scale(1.05);
+            background-color: #e9ecef;
+        }
+        .filter-btn.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl font-bold text-gray-800">Proyecto SGCW</h1>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#inicio" class="nav-link active py-2">Inicio</a>
+                    <a href="#alcance" class="nav-link py-2">Alcance</a>
+                    <a href="#requisitos" class="nav-link py-2">Requisitos</a>
+                    <a href="#actores" class="nav-link py-2">Actores y Casos de Uso</a>
+                    <a href="#fases" class="nav-link py-2">Fases del Proyecto</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <option value="#inicio">Inicio</option>
+                        <option value="#alcance">Alcance</option>
+                        <option value="#requisitos">Requisitos</option>
+                        <option value="#actores">Actores y Casos de Uso</option>
+                        <option value="#fases">Fases del Proyecto</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="inicio" class="content-section active">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Sistema de Gestión Para Co-Working (SGCW)</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Una solución integral para optimizar la gestión de espacios de coworking, mejorando la eficiencia operativa y la experiencia del cliente.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🎯</span>
+                        <h3 class="text-xl font-semibold">Objetivo Principal</h3>
+                    </div>
+                    <p class="text-gray-700">Desarrollar un sistema integral que optimice las operaciones diarias, desde la gestión de reservas hasta la generación de reportes analíticos y financieros, automatizando procesos clave.</p>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">⚙️</span>
+                        <h3 class="text-xl font-semibold">Mejora de Eficiencia</h3>
+                    </div>
+                    <p class="text-gray-700">Centralizar la administración de espacios, reglas, y notificaciones para el gestor, permitiendo un control total y en tiempo real de las operaciones del coworking.</p>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">😊</span>
+                        <h3 class="text-xl font-semibold">Experiencia del Cliente</h3>
+                    </div>
+                    <p class="text-gray-700">Ofrecer una interfaz ágil y satisfactoria para que los usuarios (personas o empresas) puedan visualizar, reservar, y gestionar sus espacios de forma autónoma y sencilla.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="alcance" class="content-section">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Alcance del Sistema</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">El sistema se estructura en módulos interconectados para cubrir todas las funcionalidades necesarias para la operación del negocio.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold mb-3 text-blue-600">Dashboard del Gestor</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Administración de espacios</li>
+                        <li>Configuración de reglas de uso</li>
+                        <li>Calendario global de reservas</li>
+                        <li>Generación de reportes (PDF/Excel)</li>
+                        <li>Emisión de notificaciones a usuarios</li>
+                    </ul>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold mb-3 text-blue-600">Interfaz del Usuario</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Visualización de espacios disponibles</li>
+                        <li>Reserva, cancelación y modificación</li>
+                        <li>Perfil de usuario con historial</li>
+                        <li>Recepción de notificaciones</li>
+                    </ul>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold mb-3 text-blue-600">Facturación y Pagos</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Integración con pasarelas de pago</li>
+                        <li>Generación de boletas/facturas</li>
+                        <li>Integración con API de SUNAT</li>
+                    </ul>
+                </div>
+                 <div class="card p-6 md:col-span-2 lg:col-span-3">
+                    <h3 class="text-lg font-bold mb-3 text-blue-600">Módulos de Soporte</h3>
+                     <div class="grid md:grid-cols-2 gap-6">
+                         <div>
+                            <h4 class="font-semibold">Control de Oficinas</h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li>Registro e inventario de espacios</li>
+                                <li>Estado en tiempo real de cada espacio</li>
+                            </ul>
+                         </div>
+                         <div>
+                            <h4 class="font-semibold">Soporte y Ayuda</h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li>Sección de preguntas frecuentes (FAQ)</li>
+                                <li>Contacto con administración</li>
+                            </ul>
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="requisitos" class="content-section">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Matriz de Requisitos</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Explora los requisitos funcionales y no funcionales del proyecto. Usa los filtros para refinar tu búsqueda y analiza la distribución de prioridades en el gráfico.</p>
+            </div>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="mb-4 flex flex-wrap gap-2">
+                        <button class="filter-btn active border border-gray-300 px-3 py-1 rounded-full text-sm" data-filter="all">Todos</button>
+                        <button class="filter-btn border border-gray-300 px-3 py-1 rounded-full text-sm" data-filter="Alta">Prioridad Alta</button>
+                        <button class="filter-btn border border-gray-300 px-3 py-1 rounded-full text-sm" data-filter="Media">Prioridad Media</button>
+                        <button class="filter-btn border border-gray-300 px-3 py-1 rounded-full text-sm" data-filter="Funcional">Funcional</button>
+                        <button class="filter-btn border border-gray-300 px-3 py-1 rounded-full text-sm" data-filter="No Funcional">No Funcional</button>
+                    </div>
+                    <div class="card p-2 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requirements-table" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card p-6 flex flex-col justify-center">
+                    <h3 class="text-lg font-bold mb-4 text-center">Distribución de Prioridades</h3>
+                    <div class="chart-container">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="actores" class="content-section">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Actores y Casos de Uso</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Identifica los roles principales y explora las acciones que pueden realizar dentro del sistema. Haz clic en un caso de uso para ver sus detalles.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="card p-6 text-center">
+                    <span class="text-5xl">👤</span>
+                    <h3 class="text-xl font-bold mt-4">Usuario</h3>
+                    <p class="text-gray-600 mt-2">Cliente (persona o empresa) que busca y reserva espacios.</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <span class="text-5xl">🧑‍💼</span>
+                    <h3 class="text-xl font-bold mt-4">Gestor</h3>
+                    <p class="text-gray-600 mt-2">Administrador del coworking. Gestiona espacios, usuarios y reportes.</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <span class="text-5xl">👑</span>
+                    <h3 class="text-xl font-bold mt-4">SuperAdmin</h3>
+                    <p class="text-gray-600 mt-2">Rol de sistema con permisos para administrar las cuentas de los gestores.</p>
+                </div>
+            </div>
+
+            <div class="card p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center mb-8">Flujo de Interacciones Principales</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    
+                    <div class="flex flex-col items-center space-y-4">
+                        <h4 class="font-bold text-lg">Usuario</h4>
+                        <div class="use-case-node border-2 border-blue-500 bg-blue-50 rounded-lg p-3 w-full text-center" data-usecase="CU-01">Registrarse</div>
+                        <div class="use-case-node border-2 border-blue-500 bg-blue-50 rounded-lg p-3 w-full text-center" data-usecase="CU-04">Explorar catálogo de espacios</div>
+                        <div class="use-case-node border-2 border-blue-500 bg-blue-50 rounded-lg p-3 w-full text-center" data-usecase="CU-05">Realizar reserva de espacio</div>
+                        <div class="use-case-node border-2 border-blue-500 bg-blue-50 rounded-lg p-3 w-full text-center" data-usecase="CU-06">Gestionar Reservas</div>
+                        <div class="use-case-node border-2 border-blue-500 bg-blue-50 rounded-lg p-3 w-full text-center" data-usecase="CU-03">Gestionar cuenta y perfil</div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center space-y-4">
+                        <h4 class="font-bold text-lg">Sistema SGCW</h4>
+                        <div class="use-case-node border-2 border-gray-500 bg-gray-50 rounded-lg p-3 w-full text-center" data-usecase="CU-02">Acceder con Usuario y Contraseña</div>
+                         <div class="use-case-node border-2 border-gray-500 bg-gray-50 rounded-lg p-3 w-full text-center">Generar comprobante electrónico</div>
+                         <div class="use-case-node border-2 border-gray-500 bg-gray-50 rounded-lg p-3 w-full text-center">Actualizar disponibilidad</div>
+                    </div>
+
+                    <div class="flex flex-col items-center space-y-4">
+                        <h4 class="font-bold text-lg">Gestor</h4>
+                        <div class="use-case-node border-2 border-green-500 bg-green-50 rounded-lg p-3 w-full text-center" data-usecase="CU-07">Administrar Cuentas de clientes</div>
+                        <div class="use-case-node border-2 border-green-500 bg-green-50 rounded-lg p-3 w-full text-center" data-usecase="CU-08">Administrar espacios</div>
+                        <div class="use-case-node border-2 border-green-500 bg-green-50 rounded-lg p-3 w-full text-center" data-usecase="CU-09">Visualizar reservas</div>
+                        <div class="use-case-node border-2 border-green-500 bg-green-50 rounded-lg p-3 w-full text-center" data-usecase="CU-10">Generar reportes</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="fases" class="content-section">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Fases del Proyecto</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">El desarrollo del proyecto sigue un ciclo de vida estructurado para garantizar la calidad y el cumplimiento de los objetivos.</p>
+            </div>
+            <div class="max-w-4xl mx-auto">
+                <div class="relative">
+                    <div class="absolute left-1/2 w-0.5 h-full bg-gray-300 hidden md:block"></div>
+                    <div class="space-y-12 md:space-y-0">
+                        
+                        <div class="md:flex md:items-center md:justify-start md:space-x-8">
+                            <div class="md:w-1/2"></div>
+                            <div class="md:w-1/2 md:pl-8">
+                                <div class="card p-6">
+                                    <h3 class="text-xl font-bold mb-2">1. Análisis</h3>
+                                    <p class="text-gray-600">Definición de objetivos, alcance, requisitos, historias de usuario y modelado inicial con diagramas de casos de uso.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="md:flex md:items-center md:justify-end md:space-x-8">
+                             <div class="md:w-1/2 md:pr-8 md:text-right">
+                                 <div class="card p-6">
+                                    <h3 class="text-xl font-bold mb-2">2. Diseño</h3>
+                                    <p class="text-gray-600">Creación de la interfaz de usuario (UI), la experiencia de usuario (UX) y prototipos visuales del software.</p>
+                                </div>
+                            </div>
+                             <div class="md:w-1/2"></div>
+                        </div>
+
+                        <div class="md:flex md:items-center md:justify-start md:space-x-8">
+                            <div class="md:w-1/2"></div>
+                             <div class="md:w-1/2 md:pl-8">
+                                <div class="card p-6">
+                                    <h3 class="text-xl font-bold mb-2">3. Construcción</h3>
+                                    <p class="text-gray-600">Desarrollo de un prototipo funcional basado en los diseños y requisitos definidos.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div class="md:flex md:items-center md:justify-end md:space-x-8">
+                             <div class="md:w-1/2 md:pr-8 md:text-right">
+                                 <div class="card p-6">
+                                    <h3 class="text-xl font-bold mb-2">4. Verificación y Validación</h3>
+                                    <p class="text-gray-600">Diseño y ejecución de casos de prueba para asegurar el correcto funcionamiento y emitir informes de calidad.</p>
+                                </div>
+                            </div>
+                             <div class="md:w-1/2"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="useCaseModal" class="modal">
+        <div class="modal-content relative">
+             <button id="closeModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            <h3 id="modalTitle" class="text-2xl font-bold mb-4"></h3>
+            <p id="modalDescription" class="text-gray-600 mb-4"></p>
+            <div class="space-y-3">
+                <div>
+                    <h4 class="font-semibold">Precondición:</h4>
+                    <p id="modalPrecondition" class="text-sm text-gray-700 bg-gray-100 p-2 rounded"></p>
+                </div>
+                <div>
+                    <h4 class="font-semibold">Flujo Básico:</h4>
+                    <div id="modalFlow" class="text-sm text-gray-700 bg-gray-100 p-2 rounded"></div>
+                </div>
+                <div>
+                    <h4 class="font-semibold">Postcondición:</h4>
+                    <p id="modalPostcondition" class="text-sm text-gray-700 bg-gray-100 p-2 rounded"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const requirementsData = [
+            { id: 'RF-01', desc: 'Gestión de tres perfiles de usuario (gestor, persona, empresa).', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-02', desc: 'Registro de cuentas con correo y datos fiscales para empresas.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-03', desc: 'Integrar pasarelas de pago seguras.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-04', desc: 'Gestor puede visualizar todas las reservas en un calendario en tiempo real.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-05', desc: 'Gestor puede crear, modificar o eliminar una reserva en nombre de un usuario.', type: 'Funcional', priority: 'Media' },
+            { id: 'RF-06', desc: 'Integración con SUNAT para generar comprobantes electrónicos.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-07', desc: 'Restablecimiento de contraseña con enlace temporal por correo.', type: 'Funcional', priority: 'Media' },
+            { id: 'RF-08', desc: 'Gestor puede activar, suspender o eliminar cuentas de usuario.', type: 'Funcional', priority: 'Media' },
+            { id: 'RF-09', desc: 'Gestor puede registrar y administrar los espacios disponibles.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-10', desc: 'Gestor puede visualizar y filtrar reservas por espacio, fecha y cliente.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-11', desc: 'Gestor puede generar reportes financieros periódicos.', type: 'Funcional', priority: 'Media' },
+            { id: 'RF-12', desc: 'Gestor puede gestionar la información y ver historial de usuarios.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-13', desc: 'Gestor puede consultar historial de facturación con filtros y exportación a PDF.', type: 'Funcional', priority: 'Media' },
+            { id: 'RF-14', desc: 'Gestor puede configurar tarifas y promociones.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-15', desc: 'Gestor puede acceder a facturas generadas por el sistema.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-16', desc: 'El sistema genera facturas automáticamente tras confirmar reserva.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-17', desc: 'Usuario puede consultar características de cada espacio.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-18', desc: 'Usuario puede ver la disponibilidad de un espacio en una fecha específica.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-19', desc: 'Usuario puede ver el costo total de la reserva.', type: 'Funcional', priority: 'Media' },
+            { id: 'RF-20', desc: 'Usuario puede acceder a su historial de reservas.', type: 'Funcional', priority: 'Media' },
+            { id: 'RF-21', desc: 'Usuario puede cancelar o modificar una reserva.', type: 'Funcional', priority: 'Alta' },
+            { id: 'RF-22', desc: 'Usuario puede ver una lista de todos los espacios disponibles.', type: 'Funcional', priority: 'Media' },
+            { id: 'RNF-01', desc: 'Inicio de sesión en menos de 3 segundos bajo carga normal.', type: 'No Funcional', priority: 'Media' },
+            { id: 'RNF-02', desc: 'Enviar notificaciones de recordatorio de reservas.', type: 'No Funcional', priority: 'Media' },
+            { id: 'RNF-03', desc: 'Enviar notificación de confirmación inmediata al reservar.', type: 'No Funcional', priority: 'Alta' },
+        ];
+        
+        const useCasesData = {
+            'CU-01': { title: 'CU-01: Registrarse', description: 'Un nuevo usuario crea una cuenta en el sistema para poder acceder a sus funcionalidades.', precondition: 'El usuario no debe tener una cuenta existente asociada al correo electrónico que va a utilizar.', flow: '1. El usuario selecciona "Registrarse".<br>2. El sistema presenta un formulario.<br>3. El usuario completa los campos.<br>4. El sistema valida los datos y crea la cuenta.<br>5. El sistema muestra un mensaje de registro exitoso.', postcondition: 'Se ha creado una nueva cuenta de usuario en el sistema.'},
+            'CU-02': { title: 'CU-02: Acceder con Usuario y Contraseña', description: 'Permite a un actor registrado autenticarse en el sistema.', precondition: 'El actor debe tener una cuenta previamente registrada.', flow: '1. El actor ingresa sus credenciales.<br>2. Selecciona "Acceder".<br>3. El sistema verifica las credenciales.<br>4. El sistema establece una sesión activa y redirige al panel principal.', postcondition: 'El actor ha iniciado sesión en el sistema.'},
+            'CU-03': { title: 'CU-03: Gestionar cuenta y perfil', description: 'Permite a un usuario autenticado ver y modificar su información personal.', precondition: 'El usuario debe haber iniciado sesión.', flow: '1. El usuario accede a "Mi Perfil".<br>2. El sistema muestra los datos actuales.<br>3. El usuario modifica los campos y guarda.<br>4. El sistema valida y actualiza la información.', postcondition: 'La información personal del usuario ha sido actualizada.'},
+            'CU-04': { title: 'CU-04: Explorar catálogo de espacios', description: 'Permite al usuario navegar y visualizar la lista de todos los espacios de trabajo disponibles.', precondition: 'Ninguna. El catálogo puede ser visto por usuarios no autenticados.', flow: '1. El cliente accede a la sección "Catálogo de espacios".<br>2. El sistema muestra una lista de espacios.<br>3. (Opcional) El cliente aplica filtros.<br>4. El sistema actualiza la lista.<br>5. El cliente selecciona un espacio para ver detalles.', postcondition: 'El usuario ha visualizado la oferta de espacios de coworking.'},
+            'CU-05': { title: 'CU-05: Realizar reserva de espacio', description: 'Un usuario selecciona un espacio, define un horario, realiza el pago y confirma la reserva.', precondition: 'El usuario debe haber iniciado sesión y haber encontrado un espacio de su interés.', flow: '1. El usuario selecciona espacio, fecha y hora.<br>2. El sistema verifica disponibilidad y calcula el costo.<br>3. El usuario confirma y procede al pago.<br>4. El sistema procesa el pago y registra la reserva.<br>5. Se actualiza la disponibilidad y se envía un comprobante.', postcondition: 'Se ha creado una nueva reserva.'},
+            'CU-06': { title: 'CU-06: Gestionar Reservas', description: 'Permite a un usuario ver su historial de reservas y acceder a opciones para modificarlas o cancelarlas.', precondition: 'El usuario ha iniciado sesión.', flow: '1. El usuario accede a "Mis Reservas".<br>2. El sistema muestra un listado de sus reservas.<br>3. El usuario selecciona una reserva para ver detalles, modificar o cancelar.', postcondition: 'El usuario ha consultado, modificado o cancelado una de sus reservas.'},
+            'CU-07': { title: 'CU-07: Administrar Cuentas de clientes', description: 'Permite al gestor buscar, ver, editar y cambiar el estado (activar/desactivar) de las cuentas de los usuarios.', precondition: 'El gestor ha iniciado sesión.', flow: '1. El gestor accede a "Gestión de Clientes".<br>2. El sistema muestra una lista de usuarios.<br>3. El gestor busca/selecciona un usuario y edita su información o estado.', postcondition: 'La información o estado de una cuenta de cliente ha sido actualizada.'},
+            'CU-08': { title: 'CU-08: Administrar espacios', description: 'Proporciona una interfaz para gestionar el catálogo de espacios (añadir, editar, eliminar).', precondition: 'El gestor ha iniciado sesión.', flow: '1. El gestor accede a "Administración de espacios".<br>2. Selecciona una acción (crear, editar o eliminar).<br>3. El sistema procesa la acción y actualiza el catálogo.', postcondition: 'El catálogo de espacios ha sido actualizado.'},
+            'CU-09': { title: 'CU-09: Visualizar reservas', description: 'Permite al gestor ver un listado completo de todas las reservas del sistema, con capacidad de búsqueda y filtro.', precondition: 'El gestor ha iniciado sesión.', flow: '1. El gestor accede a la sección "Reservas".<br>2. El sistema muestra una tabla o calendario con todas las reservas.<br>3. El gestor utiliza filtros para encontrar reservas específicas.', postcondition: 'El gestor ha consultado el estado de las reservas del sistema.'},
+            'CU-10': { title: 'CU-10: Generar reportes', description: 'Permite generar informes y visualizar estadísticas sobre el rendimiento del negocio.', precondition: 'El gestor ha iniciado sesión.', flow: '1. El gestor accede a "Reportes".<br>2. Selecciona el tipo de reporte y parámetros.<br>3. El sistema procesa los datos y muestra los resultados (gráficos y tablas).', postcondition: 'El gestor ha visualizado y/o descargado datos analíticos.'},
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNav = document.getElementById('mobile-nav');
+            const sections = document.querySelectorAll('.content-section');
+
+            function setActiveLink(targetId) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === targetId);
+                });
+                mobileNav.value = targetId;
+                sections.forEach(section => {
+                    section.classList.toggle('active', '#' + section.id === targetId);
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    setActiveLink(targetId);
+                });
+            });
+
+            mobileNav.addEventListener('change', function(e) {
+                const targetId = this.value;
+                setActiveLink(targetId);
+            });
+
+            const tableBody = document.getElementById('requirements-table');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            function renderTable(filter = 'all') {
+                tableBody.innerHTML = '';
+                const filteredData = requirementsData.filter(req => {
+                    if (filter === 'all') return true;
+                    return req.priority === filter || req.type === filter;
+                });
+
+                filteredData.forEach(req => {
+                    const row = `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${req.id}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500">${req.desc}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${req.priority === 'Alta' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                                    ${req.priority}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            }
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    renderTable(this.dataset.filter);
+                });
+            });
+
+            const priorityCounts = requirementsData.reduce((acc, req) => {
+                acc[req.priority] = (acc[req.priority] || 0) + 1;
+                return acc;
+            }, {});
+
+            const ctx = document.getElementById('priorityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(priorityCounts),
+                    datasets: [{
+                        label: 'Número de Requisitos',
+                        data: Object.values(priorityCounts),
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                        ],
+                        borderColor: [
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(245, 158, 11, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            const modal = document.getElementById('useCaseModal');
+            const closeModalBtn = document.getElementById('closeModal');
+            const useCaseNodes = document.querySelectorAll('.use-case-node');
+
+            useCaseNodes.forEach(node => {
+                node.addEventListener('click', function() {
+                    const useCaseId = this.dataset.usecase;
+                    if (useCasesData[useCaseId]) {
+                        const data = useCasesData[useCaseId];
+                        document.getElementById('modalTitle').textContent = data.title;
+                        document.getElementById('modalDescription').textContent = data.description;
+                        document.getElementById('modalPrecondition').textContent = data.precondition;
+                        document.getElementById('modalFlow').innerHTML = data.flow;
+                        document.getElementById('modalPostcondition').textContent = data.postcondition;
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+
+            closeModalBtn.onclick = () => modal.style.display = 'none';
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            };
+            
+            renderTable();
+        });
+    </script>
+</body>
+</html>
