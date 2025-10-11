@@ -76,6 +76,19 @@
       }
     }
 
+    async function fetchMembersForTeam(teamName) {
+      try {
+        const res = await fetch('/.netlify/functions/get-members?team=' + encodeURIComponent(teamName));
+        if (!res.ok) throw new Error('No API');
+        const json = await res.json();
+        // Esperamos array de miembros { student_id, full_name, email }
+        return json;
+      } catch (e) {
+        console.warn('No se pudo obtener miembros para', teamName, e);
+        return [];
+      }
+    }
+
     function renderSalonOptions(data) {
       const select = document.getElementById('salonSelect');
       select.innerHTML = '<option value="">-- Selecciona un salón --</option>';
@@ -85,6 +98,100 @@
         opt.textContent = `Salón ${salon}`;
         select.appendChild(opt);
       });
+    }
+
+    function createTeamRow(teamName) {
+      const row = document.createElement('div');
+      row.className = 'border-b pb-2 flex items-start justify-between space-x-4';
+
+      const left = document.createElement('div');
+      left.className = 'flex-1';
+
+      const header = document.createElement('div');
+      header.className = 'flex items-center space-x-3';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'font-medium';
+      nameSpan.textContent = teamName;
+      header.appendChild(nameSpan);
+
+      const viewBtn = document.createElement('button');
+      viewBtn.className = 'ml-2 text-sm text-blue-600 hover:underline bg-transparent border-0';
+      viewBtn.textContent = 'Ver miembros';
+      header.appendChild(viewBtn);
+
+      left.appendChild(header);
+
+      const expanded = document.createElement('div');
+      expanded.className = 'mt-2 w-full';
+      left.appendChild(expanded);
+
+      const right = document.createElement('div');
+      right.className = 'flex items-center space-x-3';
+
+      const teamCheckbox = document.createElement('input');
+      teamCheckbox.type = 'checkbox';
+      teamCheckbox.dataset.team = teamName;
+      teamCheckbox.className = 'team-checkbox';
+      right.appendChild(teamCheckbox);
+
+      const label = document.createElement('span');
+      label.className = 'text-sm text-gray-600';
+      label.textContent = 'Presente (equipo)';
+      right.appendChild(label);
+
+      row.appendChild(left);
+      row.appendChild(right);
+
+      // toggle members on click
+      let membersLoaded = false;
+      viewBtn.addEventListener('click', async () => {
+        if (!membersLoaded) {
+          expanded.innerHTML = '<div class="text-sm text-gray-500">Cargando miembros...</div>';
+          const members = await fetchMembersForTeam(teamName);
+          expanded.innerHTML = '';
+          if (!members || members.length === 0) {
+            expanded.innerHTML = '<div class="text-sm text-gray-500">No se encontraron miembros.</div>';
+          } else {
+            const list = document.createElement('div');
+            list.className = 'space-y-2';
+            members.forEach(m => {
+              const item = document.createElement('div');
+              item.className = 'flex items-center justify-between';
+              const info = document.createElement('div');
+              info.innerHTML = `<div class="font-medium">${m.full_name}</div><div class="text-sm text-gray-600">${m.student_id} — ${m.email || ''}</div>`;
+              const rightItem = document.createElement('div');
+              rightItem.className = 'flex items-center space-x-2';
+              const cb = document.createElement('input');
+              cb.type = 'checkbox';
+              cb.dataset.studentId = m.student_id;
+              cb.dataset.team = teamName;
+              cb.className = 'member-checkbox';
+              rightItem.appendChild(cb);
+              const lab = document.createElement('span');
+              lab.className = 'text-sm text-gray-600';
+              lab.textContent = 'Presente';
+              rightItem.appendChild(lab);
+              item.appendChild(info);
+              item.appendChild(rightItem);
+              list.appendChild(item);
+            });
+            expanded.appendChild(list);
+
+            // si se marca el equipo como presente, marcar todos los miembros
+            teamCheckbox.addEventListener('change', () => {
+              const mems = expanded.querySelectorAll('.member-checkbox');
+              mems.forEach(mcb => mcb.checked = teamCheckbox.checked);
+            });
+          }
+          membersLoaded = true;
+        } else {
+          // toggle visibility
+          expanded.style.display = expanded.style.display === 'none' ? 'block' : 'none';
+        }
+      });
+
+      return row;
     }
 
     function renderTeams(salon, teams) {
@@ -100,41 +207,11 @@
       card.appendChild(title);
 
       const list = document.createElement('div');
-      list.className = 'space-y-2';
+      list.className = 'space-y-3';
 
       teams.forEach(team => {
-        const row = document.createElement('div');
-        row.className = 'flex items-center justify-between border-b pb-2';
-
-        const left = document.createElement('div');
-        left.className = 'flex items-center space-x-3';
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'font-medium';
-        nameSpan.textContent = team.name || team;
-        left.appendChild(nameSpan);
-
-        // botón para ver miembros (abre la vista por equipo en nueva pestaña)
-        const viewBtn = document.createElement('a');
-        viewBtn.href = `/attendance_by_team.html?team=${encodeURIComponent(team.name || team)}`;
-        viewBtn.target = '_blank';
-        viewBtn.className = 'ml-2 text-sm text-blue-600 hover:underline';
-        viewBtn.textContent = 'Ver miembros';
-        left.appendChild(viewBtn);
-
-        const right = document.createElement('div');
-        right.className = 'flex items-center space-x-3';
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.dataset.team = team.name || team;
-        checkbox.checked = false;
-        right.appendChild(checkbox);
-        const label = document.createElement('span');
-        label.className = 'text-sm text-gray-600';
-        label.textContent = 'Presente';
-        right.appendChild(label);
-
-        row.appendChild(left);
-        row.appendChild(right);
+        const teamName = team.name || team;
+        const row = createTeamRow(teamName);
         list.appendChild(row);
       });
 
@@ -146,7 +223,7 @@
 
       const bulkBtn = document.createElement('button');
       bulkBtn.className = 'bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm';
-      bulkBtn.textContent = 'Marcar todos presentes';
+      bulkBtn.textContent = 'Marcar todos presentes (miembros y equipos)';
       bulkBtn.addEventListener('click', ()=>{
         container.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = true);
       });
@@ -165,11 +242,32 @@
 
     async function saveAttendance(salon) {
       if (!salon) return alert('Selecciona un salón primero');
-      const checkboxes = document.querySelectorAll('#teamsContainer input[type=checkbox]');
+      const container = document.getElementById('teamsContainer');
       const records = [];
-      checkboxes.forEach(cb => {
-        records.push({ team: cb.dataset.team, student_id: null, present: cb.checked ? 1 : 0 });
-      });
+
+      // Para cada equipo
+      const teamCards = container.querySelectorAll('div.bg-gray-50 > div.space-y-3 > div');
+      if (teamCards.length === 0) {
+        // alternativa: buscar checkboxes a nivel general
+        const cbs = container.querySelectorAll('input.team-checkbox');
+        cbs.forEach(cb => {
+          records.push({ team: cb.dataset.team, student_id: null, present: cb.checked ? 1 : 0 });
+        });
+      } else {
+        container.querySelectorAll('.team-checkbox').forEach(cb => {
+          const teamName = cb.dataset.team;
+          // buscar miembros cargados para ese equipo
+          const teamSection = cb.closest('div').querySelector('div');
+          const memberCbs = cb.closest('div').querySelectorAll('.member-checkbox');
+          if (memberCbs && memberCbs.length > 0) {
+            memberCbs.forEach(mcb => {
+              records.push({ team: teamName, student_id: mcb.dataset.studentId, present: mcb.checked ? 1 : 0 });
+            });
+          } else {
+            records.push({ team: teamName, student_id: null, present: cb.checked ? 1 : 0 });
+          }
+        });
+      }
 
       try {
         const res = await fetch('/.netlify/functions/save-attendance', {
@@ -188,12 +286,20 @@
 
     function exportCsv(salon) {
       if (!salon) return alert('Selecciona un salón primero');
-      const rows = [['salon', 'team', 'present']];
-      const checkboxes = document.querySelectorAll('#teamsContainer input[type=checkbox]');
-      checkboxes.forEach(cb => {
-        rows.push([salon, cb.dataset.team, cb.checked ? '1' : '0']);
+      const rows = [['salon','team','student_id','present']];
+      const container = document.getElementById('teamsContainer');
+      // prefer member-level if available
+      container.querySelectorAll('.team-checkbox').forEach(cb => {
+        const teamName = cb.dataset.team;
+        const memberCbs = cb.closest('div').querySelectorAll('.member-checkbox');
+        if (memberCbs && memberCbs.length > 0) {
+          memberCbs.forEach(mcb => rows.push([salon, teamName, mcb.dataset.studentId, mcb.checked ? '1' : '0']));
+        } else {
+          rows.push([salon, teamName, '', cb.checked ? '1' : '0']);
+        }
       });
-      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+      const csv = rows.map(r => r.map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
