@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Equipos Inscritos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 text-gray-800">
+    <div class="container mx-auto p-8">
+      <h1 class="text-3xl font-bold mb-8">Equipos Inscritos</h1>
+      <div id="teams-list"></div>
+    </div>
+    <script>
+      fetch('/.netlify/functions/get-teams')
+        .then((res) => res.json())
+        .then((teams) => {
+          const container = document.getElementById('teams-list')
+          if (!teams.length) {
+            container.innerHTML = '<p>No hay equipos inscritos.</p>'
+            return
+          }
+          container.innerHTML = teams
+            .map(
+              (team) => `
+          <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold mb-2">${team.name}</h2>
+            <p class="mb-2 text-gray-600">${team.message || ''}</p>
+            <h3 class="font-semibold mb-1">Miembros:</h3>
+            <ul class="list-disc pl-6">
+              ${team.members
+                .map(
+                  (m) => `
+                <li>
+                  <span class="font-bold">${m.fullName}</span>
+                  (${m.studentId}) - ${m.email}
+                  ${m.isLeader ? '<span class="text-green-600 font-semibold ml-2">Líder</span>' : ''}
+                </li>
+              `,
+                )
+                .join('')}
+            </ul>
+          </div>
+        `,
+            )
+            .join('')
+        })
+        .catch((err) => {
+          document.getElementById('teams-list').innerHTML = '<p>Error al cargar los equipos.</p>'
+          console.error(err)
+        })
+    </script>
+  </body>
+</html>
