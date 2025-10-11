@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tomar Asistencia por Equipo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+    <h1 class="text-2xl font-bold mb-4">Tomar asistencia — por Equipo</h1>
+
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Buscar equipo</label>
+      <input id="teamSearch" type="text" class="w-full border rounded px-3 py-2" placeholder="Escribe el nombre del equipo..." />
+    </div>
+
+    <div id="membersContainer" class="space-y-4 mt-6">
+      <!-- Lista de integrantes aparecerá aquí -->
+    </div>
+
+    <div class="flex justify-end space-x-3 mt-6">
+      <button id="exportCsvTeam" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Exportar CSV</button>
+      <a href="/" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Volver</a>
+    </div>
+  </div>
+
+  <script>
+    // Funcionalidad mínima: consulta a una API local que devuelva equipos y miembros.
+    async function searchTeams(query) {
+      try {
+        const res = await fetch('/.netlify/functions/search-teams?q=' + encodeURIComponent(query));
+        if (!res.ok) throw new Error('No API');
+        const json = await res.json();
+        return json; // esperamos array de nombres de equipos
+      } catch (e) {
+        console.warn('No se pudo buscar en la API.');
+        return [];
+      }
+    }
+
+    async function fetchMembers(team) {
+      try {
+        const res = await fetch('/.netlify/functions/get-members?team=' + encodeURIComponent(team));
+        if (!res.ok) throw new Error('No API');
+        const json = await res.json();
+        return json; // esperamos array de { student_id, full_name, email }
+      } catch (e) {
+        console.warn('No se pudo obtener miembros de la API.');
+        return [];
+      }
+    }
+
+    function renderMembers(team, members) {
+      const container = document.getElementById('membersContainer');
+      container.innerHTML = '';
+      if (!team) return;
+      const card = document.createElement('div');
+      card.className = 'bg-gray-50 p-4 rounded shadow';
+      const title = document.createElement('h2');
+      title.className = 'text-lg font-semibold mb-3';
+      title.textContent = `Miembros del equipo: ${team}`;
+      card.appendChild(title);
+
+      const list = document.createElement('div');
+      list.className = 'space-y-2';
+
+      members.forEach(m => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between border-b pb-2';
+        const left = document.createElement('div');
+        left.innerHTML = `<div class="font-medium">${m.full_name}</div><div class="text-sm text-gray-600">${m.student_id} — ${m.email}</div>`;
+        const right = document.createElement('div');
+        right.className = 'flex items-center space-x-3';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.dataset.studentId = m.student_id;
+        checkbox.checked = false;
+        right.appendChild(checkbox);
+        const label = document.createElement('span');
+        label.className = 'text-sm text-gray-600';
+        label.textContent = 'Presente';
+        right.appendChild(label);
+        row.appendChild(left);
+        row.appendChild(right);
+        list.appendChild(row);
+      });
+
+      card.appendChild(list);
+      container.appendChild(card);
+    }
+
+    function exportCsvForTeam(team) {
+      if (!team) return alert('Selecciona o busca un equipo primero');
+      const rows = [['team','student_id','full_name','present']];
+      const checkboxes = document.querySelectorAll('#membersContainer input[type=checkbox]');
+      checkboxes.forEach(cb => {
+        const tr = cb.closest('div').querySelector('.font-medium');
+        const fullName = tr ? tr.textContent : '';
+        rows.push([team, cb.dataset.studentId, fullName, cb.checked ? '1' : '0']);
+      });
+      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `asistencia_equipo_${team}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('teamSearch').addEventListener('input', async function(e){
+      const q = e.target.value.trim();
+      if (q.length < 2) return;
+      const teams = await searchTeams(q);
+      // Mostrar autocompletado simple
+      const listId = 'team-suggestions';
+      let list = document.getElementById(listId);
+      if (!list) {
+        list = document.createElement('div');
+        list.id = listId;
+        list.className = 'mt-2 bg-white border rounded shadow max-h-48 overflow-auto';
+        e.target.parentNode.appendChild(list);
+      }
+      list.innerHTML = '';
+      teams.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
+        item.textContent = t;
+        item.addEventListener('click', async ()=>{
+          document.getElementById('teamSearch').value = t;
+          list.remove();
+          const members = await fetchMembers(t);
+          renderMembers(t, members);
+        });
+        list.appendChild(item);
+      });
+    });
+
+    document.getElementById('exportCsvTeam').addEventListener('click', ()=>{
+      const team = document.getElementById('teamSearch').value.trim();
+      exportCsvForTeam(team);
+    });
+  </script>
+</body>
+</html>
