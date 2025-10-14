@@ -3602,7 +3602,7 @@
     ]
   },
   "packageFolders": {
-    "/home/manuel/.nuget/packages/": {}
+    "/root/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
@@ -3610,11 +3610,11 @@
       "projectUniqueName": "/home/manuel/Manuel.Best/manuel-best-vue/api/ManuelBestApi.csproj",
       "projectName": "ManuelBestApi",
       "projectPath": "/home/manuel/Manuel.Best/manuel-best-vue/api/ManuelBestApi.csproj",
-      "packagesPath": "/home/manuel/.nuget/packages/",
+      "packagesPath": "/root/.nuget/packages/",
       "outputPath": "/home/manuel/Manuel.Best/manuel-best-vue/api/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/manuel/.nuget/NuGet/NuGet.Config"
+        "/root/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
