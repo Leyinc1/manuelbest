@@ -4,7 +4,7 @@
     <ul class="link-list">
       <li class="indice">
         <RouterLink to="/kanban">Tablero Kanban</RouterLink> - Ultima versión del tablero Kanban de
-        Manuel.Best
+        Manuel.Best (EN REPARACIÓN)
       </li>
       <li class="texto-pequeño">
         Tablero Kanban totalmente funcional, recuerda inciar sesión o registrarte para poder usarlo
@@ -17,7 +17,7 @@
 
       <li class="indice">
         <RouterLink to="/calendario">Horario Interactivo</RouterLink> - Ultima versión del
-        calendario Drag and Drop de Manuel.Best
+        calendario Drag and Drop de Manuel.Best (EN REPARACIÓN)
       </li>
       <li class="texto-pequeño">
         Calendario personal totalmente funcional, recuerda iniciar sesión o registrarte para poder
