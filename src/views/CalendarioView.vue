@@ -34,7 +34,6 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import esLocale from '@fullcalendar/core/locales/es'
 import { useAuthStore } from '@/stores/authStore'
-import netlifyIdentity from 'netlify-identity-widget'
 
 const authStore = useAuthStore()
 const subjects = ref([])
@@ -72,14 +71,16 @@ onMounted(() => {
   new Draggable(document.querySelector('.subject-list'), {
     itemSelector: '.subject-item',
   })
-  loadSchedule()
-  loadSubjects()
+  if (authStore.isAuthenticated) {
+    loadSchedule()
+    loadSubjects()
+  }
 })
 
 watch(
-  () => authStore.user,
-  (newUser) => {
-    if (newUser) {
+  () => authStore.isAuthenticated,
+  (isAuth) => {
+    if (isAuth) {
       loadSchedule()
       loadSubjects()
     } else {
@@ -87,6 +88,7 @@ watch(
       subjects.value = []
     }
   },
+  { immediate: true }
 )
 
 function addSubject() {
@@ -112,14 +114,12 @@ function loadSubjects() {
 }
 
 async function loadSchedule() {
-  if (!authStore.user) return
-  const user = netlifyIdentity.currentUser()
-  const token = user.token.access_token
+  if (!authStore.token) return
 
   try {
-    const response = await fetch('/.netlify/functions/load-schedule', {
+    const response = await fetch('/api/schedule', {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authStore.token}`,
       },
     })
     const data = await response.json()
@@ -139,9 +139,7 @@ async function loadSchedule() {
 }
 
 async function saveSchedule() {
-  if (!authStore.user) return
-  const user = netlifyIdentity.currentUser()
-  const token = user.token.access_token
+  if (!authStore.token) return
   const calendarApi = fullCalendar.value.getApi()
   const schedule = calendarApi.getEvents().map((event) => {
     localStorage.setItem(event.title, event.backgroundColor)
@@ -152,15 +150,14 @@ async function saveSchedule() {
     }
   })
 
-  console.log('Saving schedule:', schedule)
-
   try {
-    await fetch('/.netlify/functions/save-schedule', {
+    await fetch('/api/schedule', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authStore.token}`,
       },
-      body: JSON.stringify({ schedule }),
+      body: JSON.stringify(schedule),
     })
   } catch (error) {
     console.error('Error saving schedule:', error)

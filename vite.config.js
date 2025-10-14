@@ -13,8 +13,8 @@ export default defineConfig({
   // --- AÑADE ESTA SECCIÓN ---
   server: {
     proxy: {
-      '/.netlify/functions': {
-        target: 'http://localhost:8888', // Puerto por defecto de 'netlify dev'
+      '/api': {
+        target: 'http://localhost:5009',
         changeOrigin: true,
       },
     },

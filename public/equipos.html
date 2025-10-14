@@ -11,7 +11,7 @@
       <div id="teams-list"></div>
     </div>
     <script>
-      fetch('/.netlify/functions/get-teams')
+      fetch('/api/teams')
         .then((res) => res.json())
         .then((teams) => {
           const container = document.getElementById('teams-list')

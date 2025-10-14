@@ -195,7 +195,7 @@
 
             try {
                 // Envía los datos a tu endpoint (ej: una función serverless o API)
-                const response = await fetch('/.netlify/functions/submit-application', {
+                const response = await fetch('/api/teams', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data),
