@@ -33,12 +33,9 @@ npm install
 echo "Compilando el frontend..."
 npm run build
 
-# Desplegar los archivos compilados
-echo "Copiando archivos del frontend..."
-sudo /bin/cp -rf dist/* /var/www/manuel.best/
-
-echo "Publicando la API de .NET..."
-sudo /usr/bin/dotnet publish api/ManuelBestApi.csproj --configuration Release -o /var/www/manuel.best/backend
+# Ejecutar los pasos finales de despliegue con sudo
+echo "Calling wrapper script to execute final steps with sudo..."
+sudo /home/manuel/Manuel.Best/manuel-best-vue/execute_deployment.sh
 
 echo "----------------------------------------"
 echo "Despliegue finalizado: $(date)"
