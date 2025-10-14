@@ -11,17 +11,14 @@ echo "----------------------------------------"
 echo "Iniciando despliegue: $(date)"
 echo "----------------------------------------"
 
-# Solucionar problema de permisos de Git
-echo "Ejecutando chown para solucionar problema de permisos de Git. Puede que se te pida la contraseña de sudo."
-sudo chown -R manuel:manuel .git
-
 # Descargar los últimos cambios de GitHub
+echo "Pulling latest changes from GitHub..."
 git pull origin master
 
 # Configurar nvm y usar la versión de Node.js correcta
+echo "Setting up nvm..."
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 nvm install 20.19.0
 nvm use 20.19.0
 
