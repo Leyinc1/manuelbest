@@ -1,18 +1,20 @@
-name: Deploy to Server
+name: Deploy via SSH
 
 on:
-  # Triggers the workflow on push events but only for the "master" branch
   push:
     branches:
       - master
 
 jobs:
-  # A single job called "deploy"
   deploy:
-    # The type of runner that the job will run on
-    runs-on: self-hosted
-
+    runs-on: ubuntu-latest
     steps:
-      # The only step is to run our deployment script
-      - name: Run deployment script
-        run: /home/manuel/Manuel.Best/manuel-best-vue/deploy.sh
+      - name: SSH and run deployment script
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/manuel/Manuel.Best/manuel-best-vue
+            ./deploy.sh
