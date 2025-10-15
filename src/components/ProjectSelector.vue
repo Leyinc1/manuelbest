@@ -1,8 +1,8 @@
 <template>
   <div class="project-selector">
     <select
-      :value="kanbanStore.currentProjectId"
-      @change="handleProjectChange"
+      v-model="kanbanStore.currentProjectId"
+      @change="onProjectChange"
       :disabled="!kanbanStore.projects.length"
     >
       <option v-if="!kanbanStore.projects.length" disabled value="">
@@ -27,6 +27,13 @@
     >
       Compartir
     </button>
+
+    <!-- DEBUG: muestra proyectos y proyecto actual (quitar en producción) -->
+    <div style="margin-top:8px;font-size:0.85rem;color:#666">
+      <div><strong>Debug projects:</strong></div>
+      <pre style="white-space:pre-wrap">{{ JSON.stringify(kanbanStore.projects, null, 2) }}</pre>
+      <div><strong>Selected project id:</strong> {{ kanbanStore.currentProjectId }}</div>
+    </div>
   </div>
 </template>
 
@@ -35,7 +42,10 @@ import { useKanbanStore } from '@/stores/kanbanStore'
 
 const kanbanStore = useKanbanStore()
 
-const handleProjectChange = (event) => {
-  kanbanStore.selectProject(event.target.value)
+const onProjectChange = (event) => {
+  // event may be undefined when v-model updates; use the store value
+  const newId = event?.target?.value ?? kanbanStore.currentProjectId
+  console.debug('[ProjectSelector] project change ->', newId)
+  kanbanStore.selectProject(newId)
 }
 </script>
