@@ -26,9 +26,10 @@ const apiCall = async (endpoint, options = {}) => {
       throw new Error(errorMessage + errorDetails)
     }
     if (response.status === 204) {
-      return { success: true }
+      return []; // Return empty array for No Content
     }
-    return await response.json()
+    const text = await response.text();
+    return text ? JSON.parse(text) : []; // Parse text only if not empty, otherwise return empty array
   } catch (error) {
     console.error(`Error en la llamada a ${endpoint}:`, error)
     alert(`Error: ${error.message}`)
