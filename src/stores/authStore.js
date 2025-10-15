@@ -81,15 +81,20 @@ export const useAuthStore = defineStore('auth', () => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     if (storedToken && storedUser) {
+      try {
         const decodedToken = parseJwt(storedToken);
-        // Check if token is expired
-        if (decodedToken.exp * 1000 > Date.now()) {
-            token.value = storedToken;
-            user.value = JSON.parse(storedUser);
+        if (decodedToken && decodedToken.exp * 1000 > Date.now()) {
+          // Token is valid and not expired
+          token.value = storedToken;
+          user.value = JSON.parse(storedUser);
         } else {
-            // Token is expired, clear it
-            logout();
+          // Token is expired or invalid
+          logout();
         }
+      } catch (error) {
+        console.error("Failed to auto-login, clearing session:", error);
+        logout();
+      }
     }
   }
 
