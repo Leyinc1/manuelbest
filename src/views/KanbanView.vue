@@ -1,7 +1,17 @@
 <template>
   <div class="kanban-view">
     <div v-if="authStore.user">
-      <ProjectSelector />
+        <ProjectSelector />
+
+        <!-- DEBUG: Información de sesión y control manual de carga (quitar en prod) -->
+        <div style="margin:12px 0;padding:10px;border:1px dashed #ccc;border-radius:6px;background:#fafafa">
+          <div style="margin-bottom:8px;font-weight:600">Debug sesión</div>
+          <div style="font-size:0.9rem;color:#333">Token (preview): <code>{{ authStore.token ? authStore.token.slice(0,20) + '...' : '—' }}</code></div>
+          <div style="font-size:0.9rem;color:#333;margin-top:6px">User: <pre style="display:inline">{{ authStore.user }}</pre></div>
+          <div style="margin-top:8px">
+            <button class="btn" @click="kanbanStore.fetchProjects">Forzar cargar proyectos</button>
+          </div>
+        </div>
 
       <div v-if="kanbanStore.projects.length > 0" class="kanban-board">
         <KanbanColumn
