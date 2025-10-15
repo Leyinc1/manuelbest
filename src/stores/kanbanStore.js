@@ -4,7 +4,8 @@ import { useAuthStore } from './authStore'
 
 const apiCall = async (endpoint, options = {}) => {
   const authStore = useAuthStore()
-  const token = authStore.token // Get the token directly from the store
+  // authStore.token is a ref; read its value
+  const token = authStore.token?.value
   if (!token) { // Check if the token exists
     console.error('API call abortada: Usuario no autenticado o token no disponible.')
     return null
@@ -225,7 +226,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   function startPolling() {
     stopPolling()
     pollingIntervalId = setInterval(() => {
-      if (currentProjectId.value && useAuthStore().user) {
+      if (currentProjectId.value && useAuthStore().user?.value) {
         fetchTasks()
       }
     }, 10000)
