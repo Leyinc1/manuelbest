@@ -13,7 +13,7 @@ echo "----------------------------------------"
 
 # Descargar los últimos cambios de GitHub
 # echo "Pulling latest changes from GitHub..."
-# git pull origin master
+git pull origin master
 
 # Configurar nvm y usar la versión de Node.js correcta
 echo "Setting up nvm..."
