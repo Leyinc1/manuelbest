@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ManuelBestApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c1b72358a25c843f3997705745d59eee8543a947")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9eb3b39f01a1a1013c345f19682eb54389b9adaf")]
 [assembly: System.Reflection.AssemblyProductAttribute("ManuelBestApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ManuelBestApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
