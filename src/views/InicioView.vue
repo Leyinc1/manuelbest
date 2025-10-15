@@ -4,7 +4,7 @@
     <ul class="link-list">
       <li class="indice">
         <RouterLink to="/kanban">Tablero Kanban</RouterLink> - Ultima versión del tablero Kanban de
-        Manuel.Best (Reparando errores)
+        Manuel.Best (Reparando errores v2)
       </li>
       <li class="texto-pequeño">
         Tablero Kanban totalmente funcional, recuerda inciar sesión o registrarte para poder usarlo
