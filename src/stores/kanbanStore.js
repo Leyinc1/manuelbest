@@ -93,7 +93,8 @@ export const useKanbanStore = defineStore('kanban', () => {
 
   async function fetchProjects() {
     const authStore = useAuthStore()
-    if (!authStore.user?.token) {
+    // authStore.token is the source of truth for the JWT token
+    if (!authStore.token) {
       projects.value = []
       tasks.value = []
       currentProjectId.value = null
