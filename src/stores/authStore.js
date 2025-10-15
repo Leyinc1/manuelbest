@@ -2,17 +2,14 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { jwtDecode } from 'jwt-decode'
+
 // Helper to parse JWT
 function parseJwt(token) {
   try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
+    return jwtDecode(token);
   } catch (e) {
-    console.error("Error parsing JWT", e);
+    console.error("Error decoding JWT with jwt-decode", e);
     return null;
   }
 }
