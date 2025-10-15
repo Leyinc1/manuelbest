@@ -82,10 +82,12 @@ public class ProjectsController : ControllerBase
 
             return CreatedAtAction(nameof(GetProjects), new { id = newProject.Id }, newProject);
         }
-        catch (Exception)
+        catch (Exception ex) // Capture the exception
         {
             await transaction.RollbackAsync();
-            return StatusCode(500, "A failure occurred while creating the project.");
+            // WARNING: Do not expose detailed exception messages in a real production environment.
+            // This is for debugging purposes only.
+            return StatusCode(500, new { error = "A failure occurred while creating the project.", details = ex.Message, innerException = ex.InnerException?.Message });
         }
     }
 
