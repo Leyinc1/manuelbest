@@ -4,15 +4,15 @@ import { useAuthStore } from './authStore'
 
 const apiCall = async (endpoint, options = {}) => {
   const authStore = useAuthStore()
-  const user = authStore.user
-  if (!user || !user.token) {
+  const token = authStore.token // Get the token directly from the store
+  if (!token) { // Check if the token exists
     console.error('API call abortada: Usuario no autenticado o token no disponible.')
     return null
   }
 
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${user.token.access_token}`,
+    Authorization: `Bearer ${token}`,
     ...options.headers,
   }
 
