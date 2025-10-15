@@ -11,6 +11,14 @@ const apiCall = async (endpoint, options = {}) => {
     return null
   }
 
+    // Log minimal info for debugging (do not leak full token in logs)
+    try {
+      const tokenPreview = token ? `${token.slice(0, 10)}...` : null
+      console.debug('[apiCall] endpoint:', endpoint, 'method:', options.method || 'GET', 'tokenPreview:', tokenPreview)
+    } catch {
+      // ignore logging errors
+    }
+
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
@@ -104,7 +112,17 @@ export const useKanbanStore = defineStore('kanban', () => {
     }
 
     const fetchedProjects = (await apiCall('/api/Projects')) || []
-    projects.value = fetchedProjects
+    console.debug('[fetchProjects] raw projects:', fetchedProjects)
+
+    // Normalize backend property casing: backend may return PascalCase (Id/Name)
+    const normalized = fetchedProjects.map((p) => ({
+      // keep original properties, but ensure `id` and `name` exist in camelCase
+      ...p,
+      id: p.id ?? p.Id,
+      name: p.name ?? p.Name,
+    }))
+    projects.value = normalized
+    console.debug('[fetchProjects] normalized projects:', projects.value)
 
     if (fetchedProjects.length > 0) {
       if (
