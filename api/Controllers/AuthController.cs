@@ -50,7 +50,7 @@ public class AuthController : ControllerBase
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("User {Email} registered successfully.", registerDto.Email);
-            return StatusCode(201, "User registered successfully.");
+            return StatusCode(201, new { message = "User registered successfully." });
         }
         catch (Exception ex)
         {
