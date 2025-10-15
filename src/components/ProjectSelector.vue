@@ -34,6 +34,9 @@
       <pre style="white-space:pre-wrap">{{ JSON.stringify(kanbanStore.projects, null, 2) }}</pre>
       <div><strong>Selected project id:</strong> {{ kanbanStore.currentProjectId }}</div>
     </div>
+    <div v-if="kanbanStore.isMockActive" style="margin-top:8px;padding:8px;background:#fff3cd;border:1px solid #ffeeba;border-radius:6px;color:#856404">
+      MOCK activo: los proyectos mostrados son de prueba (temporal)
+    </div>
   </div>
 </template>
 

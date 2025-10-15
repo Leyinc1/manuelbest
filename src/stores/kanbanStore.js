@@ -57,6 +57,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   const editingTask = ref(null)
   const availableTags = ref(['Bug', 'Mejora', 'Urgente', 'Marketing', 'Diseño'])
   const DELETE_PASSWORD = '0846'
+  const isMockActive = ref(false)
 
   // --- GETTERS ---
   const tasksByStatus = computed(() => {
@@ -123,6 +124,22 @@ export const useKanbanStore = defineStore('kanban', () => {
     }))
     projects.value = normalized
     console.debug('[fetchProjects] normalized projects:', projects.value)
+
+    // === TEMPORARY DEBUG FALLBACK ===
+    // If no projects were returned from the API, populate a small mock so the
+    // UI can be tested immediately on the server. Remove this in production.
+    if (!projects.value || projects.value.length === 0) {
+      console.warn('[fetchProjects] no projects returned from API — applying temporary mock for debugging')
+      const now = Date.now()
+      const mock = [
+        { id: '00000000-0000-0000-0000-000000000001', name: 'Proyecto de prueba 1', ownerId: 'me', createdAt: now },
+        { id: '00000000-0000-0000-0000-000000000002', name: 'Proyecto de prueba 2', ownerId: 'me', createdAt: now },
+      ]
+      projects.value = mock
+      isMockActive.value = true
+    } else {
+      isMockActive.value = false
+    }
 
     if (fetchedProjects.length > 0) {
       if (
