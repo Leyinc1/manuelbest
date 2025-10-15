@@ -8,8 +8,16 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import Sidebar from './components/AppSidebar.vue'
+import { useAuthStore } from './stores/authStore'
+
+const authStore = useAuthStore()
+
+onMounted(() => {
+  authStore.tryAutoLogin()
+})
 </script>
 
 <style>

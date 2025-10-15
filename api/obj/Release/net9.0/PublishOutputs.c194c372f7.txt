@@ -1,6 +1,7 @@
 /var/www/manuel.best/backend/ManuelBestApi
 /var/www/manuel.best/backend/appsettings.Development.json
 /var/www/manuel.best/backend/appsettings.json
+/var/www/manuel.best/backend/appsettings.Production.json
 /var/www/manuel.best/backend/ManuelBestApi.dll
 /var/www/manuel.best/backend/ManuelBestApi.runtimeconfig.json
 /var/www/manuel.best/backend/ManuelBestApi.pdb

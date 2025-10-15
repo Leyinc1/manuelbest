@@ -141,3 +141,4 @@
 /home/manuel/Manuel.Best/manuel-best-vue/api/obj/Release/net9.0/ManuelBestApi.pdb
 /home/manuel/Manuel.Best/manuel-best-vue/api/obj/Release/net9.0/ManuelBestApi.genruntimeconfig.cache
 /home/manuel/Manuel.Best/manuel-best-vue/api/obj/Release/net9.0/ref/ManuelBestApi.dll
+/home/manuel/Manuel.Best/manuel-best-vue/api/bin/Release/net9.0/appsettings.Production.json
