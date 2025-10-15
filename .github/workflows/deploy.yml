@@ -1,4 +1,4 @@
-name: Deploy via SSH
+name: Deploy via Cloudflare Tunnel
 
 on:
   push:
@@ -9,16 +9,23 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH and run deployment script
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "--- Connection successful. Testing commands... ---"
-            echo "Current directory:"
-            pwd
-            echo "--- Now attempting to run deploy script ---"
-            cd /home/manuel/Manuel.Best/manuel-best-vue
-            ./deploy.sh
+      - name: Install cloudflared
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Create SSH config for Cloudflare Tunnel
+        run: |
+          mkdir -p ~/.ssh
+          echo "Host ssh.manuel.best" >> ~/.ssh/config
+          echo "  ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h" >> ~/.ssh/config
+
+      - name: Deploy to Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -i private_key.pem manuel@ssh.manuel.best "cd /home/manuel/Manuel.Best/manuel-best-vue && ./deploy.sh"
