@@ -34,7 +34,7 @@
       </div>
       <div v-else class="no-projects">
         <h2>Bienvenido a tu Tablero Kanban</h2>
-        <p>Parece que no tienes ningún proyecto. ¡Crea uno para empezar a organizar tus tareas!</p>
+        <p>Parece que no tienes ningún proyecto. ¡Crea uno para empezar a organizar tus tareasss!</p>
       </div>
       <TaskModal />
       <TutorialModal v-if="showTutorial" @close="showTutorial = false" />
@@ -43,6 +43,9 @@
     <div v-else class="no-projects">
       <h2>Tablero Kanban</h2>
       <p>Por favor, inicia sesión para ver tus proyectos.</p>
+      <div style="margin-top:12px">
+        <button class="btn" @click="kanbanStore.forceMockProjects">Mostrar mock de proyectos</button>
+      </div>
     </div>
   </div>
 </template>
