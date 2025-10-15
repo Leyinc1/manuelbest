@@ -52,12 +52,12 @@ public class ProjectsController : ControllerBase
             return Unauthorized();
         }
 
-        // Ensure user exists in our database, create if not.
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
         {
-            user = new User { Id = userId, Email = userEmail };
-            _context.Users.Add(user);
+            // This should never happen for an authenticated user.
+            // If it does, it indicates a data consistency issue.
+            return StatusCode(500, "Authenticated user not found in the database.");
         }
 
         var newProject = new Project
