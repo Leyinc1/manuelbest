@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -42,15 +42,16 @@ const uploading = ref(false)
 const showDecoded = ref(false)
 const decodedPayload = ref(null)
 
-const localToken = authStore.token?.value
+// Reactive token value so UI updates when user logs in/out
+const tokenRef = computed(() => authStore.token?.value)
 
-const tokenPreview = localToken ? (localToken.slice(0,10) + '...') : '—'
+const tokenPreview = computed(() => tokenRef.value ? (tokenRef.value.slice(0,10) + '...') : '\u2014')
 
 function toggleDecoded() {
   showDecoded.value = !showDecoded.value
-  if (showDecoded.value && localToken) {
+  if (showDecoded.value && tokenRef.value) {
     try {
-      const payload = JSON.parse(atob(localToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))
+      const payload = JSON.parse(atob(tokenRef.value.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))
       decodedPayload.value = payload
     } catch {
       decodedPayload.value = { error: 'No se pudo decodificar token' }
@@ -61,7 +62,14 @@ function toggleDecoded() {
 const decodedPayloadString = computed(() => decodedPayload.value ? JSON.stringify(decodedPayload.value, null, 2) : '')
 
 onMounted(() => {
-  if (authStore.isAuthenticated) fetchFiles()
+  if (tokenRef.value) fetchFiles()
+})
+
+// If the token becomes available later (after login), auto-fetch files
+watch(tokenRef, (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    fetchFiles()
+  }
 })
 
 function onFileChange(e) {

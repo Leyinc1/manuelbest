@@ -19,7 +19,15 @@ public class FilesController : ControllerBase
 
     private string GetUserId()
     {
-        return User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+        // Tokens created by AuthController use the 'sub' claim (JwtRegisteredClaimNames.Sub).
+        // Some flows or libraries expose that as ClaimTypes.NameIdentifier; check both.
+        var nameId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(nameId)) return nameId;
+
+        var sub = User.FindFirst("sub")?.Value; // JWT 'sub' claim
+        if (!string.IsNullOrEmpty(sub)) return sub;
+
+        return string.Empty;
     }
 
     private string GetUserFolder(string userId)
