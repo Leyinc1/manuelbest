@@ -47,6 +47,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/archivos',
+    name: 'archivos',
+    component: () => import('../views/ArchivosView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/pomodoro',
     name: 'pomodoro',
     component: () => import('../views/PomodoroView.vue'),
