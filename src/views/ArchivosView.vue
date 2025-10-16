@@ -49,12 +49,18 @@ async function uploadFile() {
 
     try {
     const token = authStore.token?.value
+    console.debug('[Archivos] upload token preview:', token ? token.slice(0,10) + '...' : null)
     const res = await fetch('/api/Files/upload', {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: form,
     })
-    if (!res.ok) throw new Error('Error al subir archivo')
+    if (!res.ok) {
+      const body = await res.text().catch(() => null)
+      console.error('[Archivos] upload failed', res.status, body)
+      alert(`Error al subir archivo: ${res.status} ${body ?? ''}`)
+      return
+    }
     alert('Archivo subido')
     selectedFile.value = null
     fetchFiles()
@@ -68,9 +74,15 @@ async function uploadFile() {
 
 async function fetchFiles() {
   try {
-  const token = authStore.token?.value
-  const res = await fetch('/api/Files', { headers: token ? { Authorization: `Bearer ${token}` } : {} })
-    if (!res.ok) throw new Error('Error al listar archivos')
+    const token = authStore.token?.value
+    console.debug('[Archivos] list token preview:', token ? token.slice(0,10) + '...' : null)
+    const res = await fetch('/api/Files', { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    if (!res.ok) {
+      const body = await res.text().catch(() => null)
+      console.error('[Archivos] list failed', res.status, body)
+      alert(`Error al listar archivos: ${res.status} ${body ?? ''}`)
+      return
+    }
     files.value = await res.json()
   } catch (err) {
     console.error(err)
@@ -81,10 +93,16 @@ async function fetchFiles() {
 async function downloadFile(name) {
   try {
     const token = authStore.token?.value
+    console.debug('[Archivos] download token preview:', token ? token.slice(0,10) + '...' : null)
     const res = await fetch(`/api/Files/download/${encodeURIComponent(name)}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
-    if (!res.ok) throw new Error('Error al descargar archivo')
+    if (!res.ok) {
+      const body = await res.text().catch(() => null)
+      console.error('[Archivos] download failed', res.status, body)
+      alert(`Error al descargar archivo: ${res.status} ${body ?? ''}`)
+      return
+    }
 
     const blob = await res.blob()
     const url = URL.createObjectURL(blob)
