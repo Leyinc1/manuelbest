@@ -7,6 +7,14 @@
       <input type="file" ref="fileInput" @change="onFileChange" />
       <button @click="uploadFile" :disabled="!selectedFile">Subir</button>
       <div v-if="uploading">Subiendo...</div>
+      <!-- DEBUG TOKEN -->
+      <div style="margin-top:8px;padding:8px;border:1px dashed #ccc;border-radius:6px;background:#fff">
+        <strong>Debug token</strong>
+        <div>Token presente: <code>{{ !!localToken }}</code></div>
+        <div>Preview: <code>{{ tokenPreview }}</code></div>
+        <button @click="toggleDecoded">{{ showDecoded ? 'Ocultar' : 'Mostrar' }} token decodificado</button>
+        <pre v-if="showDecoded" style="white-space:pre-wrap;margin-top:8px">{{ decodedPayloadString }}</pre>
+      </div>
     </section>
 
     <section class="list-section">
@@ -24,13 +32,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
 const selectedFile = ref(null)
 const files = ref([])
 const uploading = ref(false)
+const showDecoded = ref(false)
+const decodedPayload = ref(null)
+
+const localToken = authStore.token?.value
+
+const tokenPreview = localToken ? (localToken.slice(0,10) + '...') : '—'
+
+function toggleDecoded() {
+  showDecoded.value = !showDecoded.value
+  if (showDecoded.value && localToken) {
+    try {
+      const payload = JSON.parse(atob(localToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))
+      decodedPayload.value = payload
+    } catch {
+      decodedPayload.value = { error: 'No se pudo decodificar token' }
+    }
+  }
+}
+
+const decodedPayloadString = computed(() => decodedPayload.value ? JSON.stringify(decodedPayload.value, null, 2) : '')
 
 onMounted(() => {
   if (authStore.isAuthenticated) fetchFiles()
