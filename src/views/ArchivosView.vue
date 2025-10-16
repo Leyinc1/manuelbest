@@ -47,8 +47,8 @@ async function uploadFile() {
   const form = new FormData()
   form.append('file', selectedFile.value)
 
-  try {
-    const token = authStore.token
+    try {
+    const token = authStore.token?.value
     const res = await fetch('/api/Files/upload', {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -68,8 +68,8 @@ async function uploadFile() {
 
 async function fetchFiles() {
   try {
-    const token = authStore.token
-    const res = await fetch('/api/Files', { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+  const token = authStore.token?.value
+  const res = await fetch('/api/Files', { headers: token ? { Authorization: `Bearer ${token}` } : {} })
     if (!res.ok) throw new Error('Error al listar archivos')
     files.value = await res.json()
   } catch (err) {
@@ -80,7 +80,7 @@ async function fetchFiles() {
 
 async function downloadFile(name) {
   try {
-    const token = authStore.token
+    const token = authStore.token?.value
     const res = await fetch(`/api/Files/download/${encodeURIComponent(name)}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
