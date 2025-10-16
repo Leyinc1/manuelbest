@@ -2,12 +2,19 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { jwtDecode } from 'jwt-decode'
+import jwtDecode from 'jwt-decode'
 
 // Helper to parse JWT
 function parseJwt(token) {
   try {
-    return jwtDecode(token);
+    if (typeof jwtDecode === 'function') return jwtDecode(token);
+    // Fallback: manual base64 decode of payload
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
   } catch (e) {
     console.error("Error decoding JWT with jwt-decode", e);
     return null;
@@ -45,9 +52,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(credentials) {
     const response = await apiAuthCall('/api/auth/login', credentials);
-    if (response && response.token) {
-      setAuth(response);
-      router.push({ name: 'inicio' }); // Redirect to home after login
+    if (response) {
+      // Backend may return PascalCase (C#) or camelCase (JS). Accept both.
+      const tokenValue = response.token ?? response.Token ?? null;
+      const userValue = response.user ?? response.User ?? null;
+      if (tokenValue) {
+        // Normalize shape for setAuth
+        setAuth({ token: tokenValue, user: userValue });
+        router.push({ name: 'inicio' }); // Redirect to home after login
+      } else {
+        console.warn('Login response did not include a token:', response);
+      }
     }
   }
 
@@ -68,10 +83,13 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setAuth(authResponse) {
-    user.value = authResponse.user;
-    token.value = authResponse.token;
-    localStorage.setItem('token', authResponse.token);
-    localStorage.setItem('user', JSON.stringify(authResponse.user));
+    // Accept either { token, user } or { Token, User }
+    const tokenValue = authResponse.token ?? authResponse.Token ?? null;
+    const userValue = authResponse.user ?? authResponse.User ?? null;
+    user.value = userValue || null;
+    token.value = tokenValue || null;
+    if (tokenValue) localStorage.setItem('token', tokenValue);
+    if (userValue) localStorage.setItem('user', JSON.stringify(userValue));
   }
 
   function tryAutoLogin() {
