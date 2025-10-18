@@ -3,28 +3,10 @@
     <h2>Inicio / Páginas de Interés</h2>
     <ul class="link-list">
       <li class="indice">
-        <RouterLink to="/kanban">Tablero Kanban</RouterLink> - Ultima versión del tablero Kanban de
-        Manuel.Best (Reparando errores 3833)
+        <RouterLink to="/qr">QR GENERATOR</RouterLink> - Generador de códigos QR sencillo y rápido.
       </li>
-      <li class="texto-pequeño">
-        Tablero Kanban totalmente funcional, recuerda inciar sesión o registrarte para poder usarlo
-        o recibir invitaciones.
-      </li>
-      <li class="texto-pequeño">
-        Actualmente en la versión 6.0, ya no es necesario recargar la pagina para ver los cambios.
-      </li>
-      <li class="texto-pequeño">Click en el boton de "?" para ver tutorial.</li>
+      <li class="texto-pequeño">Introduce texto, enlace o información y genera un QR para compartir o descargar.</li>
 
-      <li class="indice">
-        <RouterLink to="/calendario">Horario Interactivo</RouterLink> - Ultima versión del
-        calendario Drag and Drop de Manuel.Best (EN REPARACIÓN)
-      </li>
-      <li class="texto-pequeño">
-        Calendario personal totalmente funcional, recuerda iniciar sesión o registrarte para poder
-        usarlo!
-      </li>
-      <li class="texto-pequeño">No olvides guardar tu horario!</li>
-      <li class="texto-pequeño">Proximamente: Colores personalizados</li>
       <li class="indice">
         <RouterLink to="/pomodoro">Pomodoro</RouterLink> - Reloj Pomodoro para sesiones de estudio y
         trabajo.

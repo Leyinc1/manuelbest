@@ -41,12 +41,6 @@ const routes = [
     component: () => import('../views/InteresesView.vue'),
   },
   {
-    path: '/kanban',
-    name: 'kanban',
-    component: () => import('../views/KanbanView.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
     path: '/archivos',
     name: 'archivos',
     component: () => import('../views/ArchivosView.vue'),
@@ -59,10 +53,9 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/calendario',
-    name: 'calendario',
-    component: () => import('../views/CalendarioView.vue'),
-    meta: { requiresAuth: true },
+    path: '/qr',
+    name: 'qr',
+    component: () => import('../views/QRGeneratorView.vue'),
   },
   {
     path: '/tetris',
