@@ -1,15 +1,13 @@
 <template>
   <q-layout view="hHh lpR fFf" class="app-layout" :class="[{ 'reduce-effects': reduceEffects }, { 'paused-anim': pausedAnim }]">
-    <!-- Decorative animated background -->
-    <div class="bg-decor">
-      <div class="blob b1"></div>
-      <div class="blob b2"></div>
-      <div class="grid-overlay"></div>
-    </div>
     <q-header elevated class="header-gradient text-white">
       <q-toolbar>
         <q-btn flat dense round icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Abrir menú" />
         <q-toolbar-title>Manuel Best</q-toolbar-title>
+        <q-space />
+        <q-btn flat round dense :icon="reduceEffects ? 'bolt' : 'bolt'" :color="reduceEffects ? 'cyan' : 'blue'" @click="togglePerformance()">
+          <q-tooltip>Modo rendimiento: {{ reduceEffects ? 'Activado' : 'Desactivado' }}</q-tooltip>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -37,7 +35,8 @@ import { useAuthStore } from './stores/authStore'
 
 const authStore = useAuthStore()
 const leftDrawerOpen = ref(true)
-const reduceEffects = ref(false)
+// Por defecto activamos modo rendimiento (usuario reporta lentitud)
+const reduceEffects = ref(true)
 const pausedAnim = ref(false)
 
 onMounted(() => {
@@ -58,20 +57,24 @@ onMounted(() => {
   document.addEventListener('visibilitychange', updatePaused)
   updatePaused()
 })
+
+function togglePerformance() {
+  reduceEffects.value = !reduceEffects.value
+}
 </script>
 
 <style>
 /* --- VARIABLES Y ESTILOS GLOBALES --- */
 :root {
-  --bg-dark: #0b1020;
-  --bg-light: #0f1427;
-  --card-bg: rgba(255,255,255,0.08);
-  --primary-color: #7C4DFF; /* indigo accent */
+  --bg-dark: #060914; /* casi negro azulado */
+  --bg-light: #0b1222; /* azul muy oscuro */
+  --card-bg: rgba(17, 24, 39, 0.6); /* slate/azul translúcido */
+  --primary-color: #1E3A8A; /* blue-800 */
   --text-dark: #e2e8f0;
   --text-light: #f8fafc;
-  --border-color: rgba(255,255,255,0.18);
-  --accent-1: #D946EF; /* fuchsia */
-  --accent-2: #22D3EE; /* cyan */
+  --border-color: rgba(255,255,255,0.12);
+  --accent-1: #2563EB; /* blue-600 */
+  --accent-2: #06B6D4; /* cyan-500 */
 }
 
 * {
@@ -82,9 +85,10 @@ body {
   font-family: 'Lato', sans-serif;
   margin: 0;
   line-height: 1.6;
-  background: radial-gradient(1200px 800px at 10% 10%, rgba(124,77,255,0.25), transparent 60%),
-              radial-gradient(800px 600px at 90% 20%, rgba(34,211,238,0.18), transparent 60%),
-              linear-gradient(180deg, var(--bg-light) 0%, #0a0f1f 100%);
+  background:
+    radial-gradient(900px 600px at 15% 10%, rgba(37,99,235,0.12), transparent 60%),
+    radial-gradient(700px 500px at 85% 20%, rgba(6,182,212,0.10), transparent 60%),
+    linear-gradient(180deg, var(--bg-light) 0%, #060a16 100%);
   color: var(--text-dark);
 }
 
@@ -107,19 +111,14 @@ hr {
 
 /* --- Decorative Background Layers --- */
 .app-layout { position: relative; overflow: hidden; }
-.bg-decor { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.bg-decor .blob { position: absolute; filter: blur(24px); opacity: 0.5; mix-blend-mode: screen; will-change: transform; transform: translateZ(0); }
-.bg-decor .b1 { width: 40vw; height: 40vw; top: -10vw; left: -10vw; background: radial-gradient(circle, rgba(124,77,255,0.6), transparent 60%); animation: float1 18s ease-in-out infinite alternate; }
-.bg-decor .b2 { width: 35vw; height: 35vw; bottom: -10vw; right: -10vw; background: radial-gradient(circle, rgba(217,70,239,0.5), transparent 60%); animation: float2 22s ease-in-out infinite alternate; }
-.bg-decor .grid-overlay { position: absolute; inset: 0; background:
-  radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0) 0 0/26px 26px; opacity: 0.3; }
+/* Eliminamos blobs animados por rendimiento */
+.bg-decor, .bg-decor * { display: none !important; }
 
 @keyframes float1 { from { transform: translateY(0) } to { transform: translateY(30px) } }
 @keyframes float2 { from { transform: translateY(0) } to { transform: translateY(-30px) } }
 
-/* --- Header Gradient --- */
-.header-gradient { background: linear-gradient(90deg, #7C4DFF, #D946EF, #22D3EE); background-size: 200% 200%; animation: hueShift 18s ease infinite; will-change: background-position; }
-@keyframes hueShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+/* --- Header Gradient (estático, azul) --- */
+.header-gradient { background: linear-gradient(90deg, #0b1222, #1E3A8A, #2563EB); background-size: 100% 100%; }
 
 /* --- BARRA LATERAL --- */
 .sidebar {
@@ -152,7 +151,7 @@ hr {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  border: 5px solid var(--primary-color);
+  border: 4px solid var(--accent-1);
   object-fit: cover;
   margin-bottom: 20px;
 }
@@ -210,11 +209,12 @@ hr {
   background: var(--card-bg);
   padding: 30px;
   border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
   margin-bottom: 30px;
   border: 1px solid var(--border-color);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* quitamos blur por rendimiento */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 
   /* Por defecto, las tarjetas están ocultas */
   display: none;
@@ -272,7 +272,7 @@ hr {
 }
 
 /* --- Page transition --- */
-.fade-slide-enter-active, .fade-slide-leave-active { transition: all .28s ease; will-change: transform, opacity; }
+.fade-slide-enter-active, .fade-slide-leave-active { transition: all .2s ease; will-change: transform, opacity; }
 .fade-slide-enter-from { opacity: 0; transform: translateY(8px); }
 .fade-slide-leave-to   { opacity: 0; transform: translateY(-8px); }
 
