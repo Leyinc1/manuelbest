@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import jwtDecode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 // Helper to parse JWT
 function parseJwt(token) {

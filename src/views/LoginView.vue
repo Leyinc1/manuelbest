@@ -1,24 +1,19 @@
 
 <template>
   <div class="auth-container">
-    <div class="auth-form">
-      <h2>{{ isLogin ? 'Iniciar Sesión' : 'Registro' }}</h2>
-      <form @submit.prevent="handleSubmit">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" v-model="email" required />
+    <div class="auth-form q-pa-md q-gutter-md">
+      <div class="text-h5">{{ isLogin ? 'Iniciar Sesión' : 'Registro' }}</div>
+      <q-form @submit.prevent="handleSubmit" class="q-gutter-md">
+        <q-input type="email" v-model="email" label="Email" filled dense required />
+        <q-input type="password" v-model="password" label="Contraseña" filled dense required />
+        <div class="row q-gutter-sm">
+          <q-btn color="primary" type="submit" :label="isLogin ? 'Login' : 'Register'" />
+          <q-btn flat color="primary" :label="isLogin ? 'Registrarse' : 'Iniciar sesión'" @click="toggleForm" />
         </div>
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input type="password" v-model="password" required />
-        </div>
-        <button type="submit">{{ isLogin ? 'Login' : 'Register' }}</button>
-      </form>
-      <a @click.prevent="toggleForm" href="#">
-        {{ isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión' }}
-      </a>
+      </q-form>
     </div>
   </div>
+
 </template>
 
 <script setup>
@@ -57,37 +52,5 @@ const handleSubmit = () => {
   border-radius: 8px;
   width: 100%;
   max-width: 400px;
-}
-.form-group {
-  margin-bottom: 1rem;
-}
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-bottom: 1rem;
-}
-button:hover {
-  background-color: #0056b3;
-}
-a {
-  text-align: center;
-  display: block;
-  color: #007bff;
-  cursor: pointer;
 }
 </style>

@@ -1,19 +1,34 @@
 <template>
-  <div class="portfolio-container">
-    <Sidebar />
-    <main class="main-content">
-      <RouterView />
-    </main>
-  </div>
+  <q-layout view="hHh lpR fFf">
+    <q-header elevated class="bg-primary text-white">
+      <q-toolbar>
+        <q-btn flat dense round icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Abrir menú" />
+        <q-toolbar-title>Manuel Best</q-toolbar-title>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer v-model="leftDrawerOpen" show-if-above side="left" bordered>
+      <!-- Reuse existing Sidebar content inside the drawer -->
+      <Sidebar />
+    </q-drawer>
+
+    <q-page-container>
+      <q-page padding>
+        <RouterView />
+      </q-page>
+    </q-page-container>
+  </q-layout>
+
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterView } from 'vue-router'
 import Sidebar from './components/AppSidebar.vue'
 import { useAuthStore } from './stores/authStore'
 
 const authStore = useAuthStore()
+const leftDrawerOpen = ref(true)
 
 onMounted(() => {
   authStore.tryAutoLogin()
@@ -62,11 +77,7 @@ hr {
 }
 
 /* --- DISEÑO PRINCIPAL (Layout) --- */
-.portfolio-container {
-  display: flex;
-  width: 100%;
-  height: 100vh;
-}
+/* Quasar layout handles main container; keep some spacing tweaks if needed */
 
 /* --- BARRA LATERAL --- */
 .sidebar {
@@ -143,12 +154,7 @@ hr {
 }
 
 /* --- CONTENIDO PRINCIPAL --- */
-.main-content {
-  margin-left: 320px;
-  width: calc(100% - 320px);
-  display: flex;
-  flex-direction: column;
-}
+.main-content { display: block }
 
 .main-content h2 {
   color: var(--text-dark);
@@ -221,30 +227,7 @@ hr {
 }
 
 /* --- DISEÑO RESPONSIVO (Sin cambios, sigue siendo importante) --- */
-@media (max-width: 992px) {
-  .portfolio-container {
-    flex-direction: column;
-  }
-  .sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
-    padding-bottom: 20px;
-  }
-  .sidebar-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 10px 0;
-  }
-  .nav-button {
-    flex-shrink: 0;
-  }
-  .main-content {
-    margin-left: 0;
-    width: 100%;
-    padding: 20px;
-  }
-}
+@media (max-width: 992px) { .main-content { width: 100%; padding: 20px; } }
 .indice {
   font-size: 30px;
 }
