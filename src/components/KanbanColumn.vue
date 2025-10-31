@@ -59,10 +59,10 @@ const onDragChange = (event) => {
   border-radius: 12px 12px 0 0;
 }
 
-/* Colores para cada cabecera */
+/* Colores para cada cabecera (azules/tema oscuro) */
 .header-requerimientos {
-  background-color: #6a0dad;
-} /* Púrpura */
+  background-color: #1E3A8A; /* azul oscuro */
+}
 .header-todo {
   background-color: #0077b6;
 } /* Azul */

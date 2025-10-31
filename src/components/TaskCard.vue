@@ -57,7 +57,7 @@ const kanbanStore = useKanbanStore()
 
 /* Colores del borde izquierdo según la columna */
 .border-requerimientos {
-  border-left-color: #6a0dad;
+  border-left-color: #1E3A8A; /* azul oscuro */
 }
 .border-todo {
   border-left-color: #0077b6;
@@ -158,7 +158,7 @@ const kanbanStore = useKanbanStore()
   background-color: #fca311;
 }
 .tag-marketing, .chip-marketing {
-  background-color: #9b5de5;
+  background-color: #2563EB; /* azul */
 }
 .tag-diseño, .chip-diseño {
   background-color: #f15bb5;
