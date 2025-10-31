@@ -1,30 +1,25 @@
 <template>
-  <div class="card" :class="`border-${statusId}`" @click.stop="kanbanStore.openModalForEdit(task)">
-    <div v-if="task.tags && task.tags.length > 0" class="tags-container">
-      <span
-        v-for="tag in task.tags"
-        :key="tag"
-        :class="`tag tag-${tag.toLowerCase().replace(/\s+/g, '-')}`"
-      >
-        {{ tag }}
-      </span>
-    </div>
-
-    <span>{{ task.content }}</span>
-
-    <div v-if="task.assigned_to" class="assigned-person">
-      {{ task.assigned_to }}
-    </div>
-
-    <div class="card-actions">
-      <button class="edit-btn" @click.stop="kanbanStore.openModalForEdit(task)">
-        <i class="fas fa-pencil-alt"></i>
-      </button>
-      <button class="delete-btn" @click.stop="kanbanStore.deleteTask(task.id)">
-        <i class="fas fa-trash-alt"></i>
-      </button>
-    </div>
-  </div>
+  <q-card flat bordered class="task-card" :class="`border-${statusId}`" @click.stop="kanbanStore.openModalForEdit(task)">
+    <q-card-section v-if="task.tags && task.tags.length" class="q-pt-sm q-pb-none">
+      <div class="row q-col-gutter-xs">
+        <div v-for="tag in task.tags" :key="tag" class="col-auto">
+          <q-chip dense square :class="`chip-${tag.toLowerCase().replace(/\\s+/g, '-')}`" text-color="white">
+            {{ tag }}
+          </q-chip>
+        </div>
+      </div>
+    </q-card-section>
+    <q-card-section>
+      <div class="text-subtitle1 text-weight-medium">{{ task.content }}</div>
+      <div v-if="task.assigned_to" class="text-caption q-mt-xs text-grey-5 flex items-center">
+        <q-icon name="person" size="16px" class="q-mr-xs" /> {{ task.assigned_to }}
+      </div>
+    </q-card-section>
+    <q-card-actions align="right">
+      <q-btn flat dense round icon="edit" color="primary" @click.stop="kanbanStore.openModalForEdit(task)" />
+      <q-btn flat dense round icon="delete" color="negative" @click.stop="kanbanStore.deleteTask(task.id)" />
+    </q-card-actions>
+  </q-card>
 </template>
 
 <script setup>
@@ -45,24 +40,19 @@ const kanbanStore = useKanbanStore()
 </script>
 
 <style scoped>
-.card {
+.task-card {
   position: relative;
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   cursor: grab;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
   border-left: 5px solid transparent; /* Borde para dar color */
   font-weight: 500;
 }
-
-.card:hover {
+.task-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
 }
 
 /* Colores del borde izquierdo según la columna */
@@ -87,14 +77,14 @@ const kanbanStore = useKanbanStore()
   transform: rotate(3deg);
 }
 
-.card span {
+.task-card span {
   display: block;
   margin-right: 50px; /* Espacio para los botones */
   word-wrap: break-word;
 }
 
-.card .delete-btn,
-.card .edit-btn {
+.task-card .delete-btn,
+.task-card .edit-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -109,8 +99,8 @@ const kanbanStore = useKanbanStore()
     color 0.2s;
 }
 
-.card:hover .delete-btn,
-.card:hover .edit-btn {
+.task-card:hover .delete-btn,
+.task-card:hover .edit-btn {
   opacity: 1;
 }
 
@@ -158,22 +148,22 @@ const kanbanStore = useKanbanStore()
 }
 
 /* Colores predefinidos para etiquetas comunes */
-.tag-bug {
+.tag-bug, .chip-bug {
   background-color: #d62828;
 }
-.tag-mejora {
+.tag-mejora, .chip-mejora {
   background-color: #0077b6;
 }
-.tag-urgente {
+.tag-urgente, .chip-urgente {
   background-color: #fca311;
 }
-.tag-marketing {
+.tag-marketing, .chip-marketing {
   background-color: #9b5de5;
 }
-.tag-diseño {
+.tag-diseño, .chip-diseño {
   background-color: #f15bb5;
 }
-.tag-default {
+.tag-default, .chip-default {
   background-color: #6c757d;
 } /* Color por defecto */
 </style>

@@ -1,6 +1,12 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-primary text-white">
+  <q-layout view="hHh lpR fFf" class="app-layout">
+    <!-- Decorative animated background -->
+    <div class="bg-decor">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <q-header elevated class="header-gradient text-white">
       <q-toolbar>
         <q-btn flat dense round icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Abrir menú" />
         <q-toolbar-title>Manuel Best</q-toolbar-title>
@@ -14,7 +20,9 @@
 
     <q-page-container>
       <q-page padding>
-        <RouterView />
+        <transition name="fade-slide" mode="out-in">
+          <RouterView />
+        </transition>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -38,13 +46,15 @@ onMounted(() => {
 <style>
 /* --- VARIABLES Y ESTILOS GLOBALES --- */
 :root {
-  --bg-dark: #2c3e50;
-  --bg-light: #ecf0f1;
-  --card-bg: #ffffff;
-  --primary-color: #3498db;
-  --text-dark: #34495e;
-  --text-light: #ecf0f1;
-  --border-color: #bdc3c7;
+  --bg-dark: #0b1020;
+  --bg-light: #0f1427;
+  --card-bg: rgba(255,255,255,0.08);
+  --primary-color: #7C4DFF; /* indigo accent */
+  --text-dark: #e2e8f0;
+  --text-light: #f8fafc;
+  --border-color: rgba(255,255,255,0.18);
+  --accent-1: #D946EF; /* fuchsia */
+  --accent-2: #22D3EE; /* cyan */
 }
 
 * {
@@ -55,7 +65,9 @@ body {
   font-family: 'Lato', sans-serif;
   margin: 0;
   line-height: 1.6;
-  background-color: var(--bg-light);
+  background: radial-gradient(1200px 800px at 10% 10%, rgba(124,77,255,0.25), transparent 60%),
+              radial-gradient(800px 600px at 90% 20%, rgba(34,211,238,0.18), transparent 60%),
+              linear-gradient(180deg, var(--bg-light) 0%, #0a0f1f 100%);
   color: var(--text-dark);
 }
 
@@ -76,8 +88,21 @@ hr {
   margin: 20px 0;
 }
 
-/* --- DISEÑO PRINCIPAL (Layout) --- */
-/* Quasar layout handles main container; keep some spacing tweaks if needed */
+/* --- Decorative Background Layers --- */
+.app-layout { position: relative; overflow: hidden; }
+.bg-decor { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.bg-decor .blob { position: absolute; filter: blur(50px); opacity: 0.6; mix-blend-mode: screen; }
+.bg-decor .b1 { width: 40vw; height: 40vw; top: -10vw; left: -10vw; background: radial-gradient(circle, rgba(124,77,255,0.6), transparent 60%); animation: float1 18s ease-in-out infinite alternate; }
+.bg-decor .b2 { width: 35vw; height: 35vw; bottom: -10vw; right: -10vw; background: radial-gradient(circle, rgba(217,70,239,0.5), transparent 60%); animation: float2 22s ease-in-out infinite alternate; }
+.bg-decor .grid-overlay { position: absolute; inset: 0; background:
+  radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0) 0 0/24px 24px; opacity: 0.4; }
+
+@keyframes float1 { from { transform: translateY(0) } to { transform: translateY(30px) } }
+@keyframes float2 { from { transform: translateY(0) } to { transform: translateY(-30px) } }
+
+/* --- Header Gradient --- */
+.header-gradient { background: linear-gradient(90deg, #7C4DFF, #D946EF, #22D3EE); background-size: 200% 200%; animation: hueShift 16s ease infinite; }
+@keyframes hueShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
 /* --- BARRA LATERAL --- */
 .sidebar {
@@ -165,11 +190,14 @@ hr {
 
 /* --- TARJETAS DE CONTENIDO (Cards) --- */
 .view-card {
-  background-color: var(--card-bg);
+  background: var(--card-bg);
   padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   margin-bottom: 30px;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 
   /* Por defecto, las tarjetas están ocultas */
   display: none;
@@ -225,6 +253,11 @@ hr {
     transform: translateY(0);
   }
 }
+
+/* --- Page transition --- */
+.fade-slide-enter-active, .fade-slide-leave-active { transition: all .35s ease; }
+.fade-slide-enter-from { opacity: 0; transform: translateY(8px); }
+.fade-slide-leave-to   { opacity: 0; transform: translateY(-8px); }
 
 /* --- DISEÑO RESPONSIVO (Sin cambios, sigue siendo importante) --- */
 @media (max-width: 992px) { .main-content { width: 100%; padding: 20px; } }

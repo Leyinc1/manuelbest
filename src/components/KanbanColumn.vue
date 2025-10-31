@@ -1,23 +1,29 @@
 <template>
-  <div class="column" :id="statusId">
+  <q-card flat bordered class="kanban-col">
     <div class="column-header" :class="`header-${statusId}`">
-      <h3>{{ title }} ({{ tasks.length }})</h3>
+      <div class="row items-center no-wrap q-px-md q-py-sm">
+        <div class="col text-white text-weight-medium">{{ title }}</div>
+        <div class="col-auto"><q-badge color="white" text-color="dark">{{ tasks.length }}</q-badge></div>
+      </div>
     </div>
-    <draggable
-      class="card-container"
-      :list="tasks"
-      group="tasks"
-      itemKey="id"
-      @change="onDragChange"
-    >
-      <template #item="{ element }">
-        <TaskCard :task="element" :status-id="statusId" />
-      </template>
-    </draggable>
-    <button class="add-task-btn" @click="kanbanStore.openModalForNew(statusId)">
-      Añadir tarea
-    </button>
-  </div>
+    <q-separator inset />
+    <div class="q-pa-md">
+      <draggable
+        class="card-container"
+        :list="tasks"
+        group="tasks"
+        itemKey="id"
+        @change="onDragChange"
+      >
+        <template #item="{ element }">
+          <TaskCard :task="element" :status-id="statusId" />
+        </template>
+      </draggable>
+      <div class="q-mt-md flex">
+        <q-btn class="full-width" color="secondary" icon="add" label="Añadir tarea" @click="kanbanStore.openModalForNew(statusId)" />
+      </div>
+    </div>
+  </q-card>
 </template>
 
 <script setup>
@@ -43,15 +49,7 @@ const onDragChange = (event) => {
 </script>
 
 <style scoped>
-.column {
-  background-color: #f1f1f1; /* Un gris muy claro para el fondo de las tarjetas */
-  border-radius: 12px;
-  width: 300px; /* Ancho fijo para cada columna */
-  min-width: 250px; /* Ancho mínimo para la columna */
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+.kanban-col { background: rgba(255,255,255,0.06); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); }
 
 .column-header {
   padding: 15px 20px;
@@ -59,7 +57,6 @@ const onDragChange = (event) => {
   font-weight: 500;
   color: #fff;
   border-radius: 12px 12px 0 0;
-  text-align: center;
 }
 
 /* Colores para cada cabecera */
@@ -85,26 +82,4 @@ const onDragChange = (event) => {
   flex-grow: 1;
 }
 
-/* --- BOTÓN PARA AÑADIR TAREAS --- */
-.add-task-btn {
-  width: calc(100% - 40px);
-  margin: 0 20px 20px;
-  padding: 12px;
-  border: none;
-  background-color: #e9ecef;
-  color: #495057;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  font-family: 'Poppins', sans-serif;
-  border-radius: 8px;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
-}
-
-.add-task-btn:hover {
-  background-color: #ced4da;
-  color: #212529;
-}
 </style>

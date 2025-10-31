@@ -157,18 +157,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     startPolling()
   }
 
-  // TEMPORARY helper: force a mock set of projects for debugging (no auth required)
-  function forceMockProjects() {
-    console.warn('[forceMockProjects] Applying temporary mock projects')
-    const now = Date.now()
-    const mock = [
-      { id: '00000000-0000-0000-0000-000000000001', name: 'Proyecto de prueba 1', ownerId: 'me', createdAt: now },
-      { id: '00000000-0000-0000-0000-000000000002', name: 'Proyecto de prueba 2', ownerId: 'me', createdAt: now },
-    ]
-    projects.value = mock
-    isMockActive.value = true
-    currentProjectId.value = mock[0].id
-  }
+
 
   async function selectProject(projectId) {
     currentProjectId.value = projectId

@@ -1,8 +1,11 @@
 /* --- CONFIGURACIÓN GENERAL --- */
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #f8f9fa; /* Un blanco un poco más cálido */
-  color: #343a40;
+  background:
+    radial-gradient(1200px 800px at 10% 10%, rgba(124,77,255,0.12), transparent 60%),
+    radial-gradient(1000px 800px at 90% 0%, rgba(34,211,238,0.1), transparent 60%),
+    linear-gradient(180deg, #0f1427 0%, #0a0f1f 100%);
+  color: #e2e8f0;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -65,31 +68,31 @@ h1 {
 }
 
 .btn-primary {
-  background-color: #0077b6; /* Blue */
+  background-image: linear-gradient(135deg, #7C4DFF, #22D3EE);
 }
 .btn-primary:hover:not(:disabled) {
-  background-color: #005f9c;
+  filter: brightness(1.05);
 }
 
 .btn-secondary {
-  background-color: #6c757d; /* Gray */
+  background-image: linear-gradient(135deg, #64748B, #475569);
 }
 .btn-secondary:hover:not(:disabled) {
-  background-color: #5a6268;
+  filter: brightness(1.05);
 }
 
 .btn-success {
-  background-color: #2a9d8f; /* Green */
+  background-image: linear-gradient(135deg, #10B981, #22D3EE);
 }
 .btn-success:hover:not(:disabled) {
-  background-color: #268a7f;
+  filter: brightness(1.05);
 }
 
 .btn-danger {
-  background-color: #e63946; /* Red */
+  background-image: linear-gradient(135deg, #EF4444, #F59E0B);
 }
 .btn-danger:hover:not(:disabled) {
-  background-color: #c12c38;
+  filter: brightness(1.05);
 }
 
 /* --- ESTILOS PARA LA MODAL DE TAREAS --- */

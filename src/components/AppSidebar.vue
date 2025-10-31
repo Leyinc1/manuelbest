@@ -12,14 +12,32 @@
       <h1>Manuel Ipenza Negri</h1>
       <p class="job-title">Desarrollador FullStack</p>
       <hr />
-      <nav class="sidebar-nav">
-        <RouterLink to="/" class="nav-button">Inicio</RouterLink>
-        <RouterLink to="/objetivo" class="nav-button">Objetivo</RouterLink>
-        <RouterLink to="/tecnologias" class="nav-button">Tecnologías</RouterLink>
-        <RouterLink to="/proyectos" class="nav-button">Proyectos</RouterLink>
-        <RouterLink to="/intereses" class="nav-button">Intereses</RouterLink>
-        <RouterLink to="/Perfiles" class="nav-button">Perfiles Recomendados</RouterLink>
-      </nav>
+      <q-list padding class="q-mt-sm">
+        <q-item clickable v-ripple to="/" exact>
+          <q-item-section avatar><q-icon name="home" /></q-item-section>
+          <q-item-section>Inicio</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/objetivo">
+          <q-item-section avatar><q-icon name="flag" /></q-item-section>
+          <q-item-section>Objetivo</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/tecnologias">
+          <q-item-section avatar><q-icon name="widgets" /></q-item-section>
+          <q-item-section>Tecnologías</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/proyectos">
+          <q-item-section avatar><q-icon name="work" /></q-item-section>
+          <q-item-section>Proyectos</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/intereses">
+          <q-item-section avatar><q-icon name="favorite" /></q-item-section>
+          <q-item-section>Intereses</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/Perfiles">
+          <q-item-section avatar><q-icon name="groups" /></q-item-section>
+          <q-item-section>Perfiles Recomendados</q-item-section>
+        </q-item>
+      </q-list>
       <hr />
       <UserStatus />
       <hr />
@@ -33,7 +51,6 @@
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router'
 import UserStatus from './UserStatus.vue'
 import { computed } from 'vue'
 

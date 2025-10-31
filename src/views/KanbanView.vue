@@ -1,40 +1,38 @@
 <template>
   <div class="kanban-view">
     <div v-if="authStore.user">
-        <ProjectSelector />
-
-        <!-- DEBUG: Información de sesión y control manual de carga (quitar en prod) -->
-        <div style="margin:12px 0;padding:10px;border:1px dashed #ccc;border-radius:6px;background:#fafafa">
-          <div style="margin-bottom:8px;font-weight:600">Debug sesión</div>
-          <div style="font-size:0.9rem;color:#333">Token (preview): <code>{{ authStore.token ? authStore.token.slice(0,20) + '...' : '—' }}</code></div>
-          <div style="font-size:0.9rem;color:#333;margin-top:6px">User: <pre style="display:inline">{{ authStore.user }}</pre></div>
-          <div style="margin-top:8px">
-            <button class="btn" @click="kanbanStore.fetchProjects">Forzar cargar proyectos</button>
+      <q-card flat bordered class="glass-card q-mb-md">
+        <q-card-section class="row items-center q-col-gutter-md">
+          <div class="col-12 col-md-6">
+            <ProjectSelector />
           </div>
-        </div>
+          <div class="col-12 col-md-6 row justify-end q-gutter-sm">
+            <q-btn color="primary" icon="sync" label="Recargar" @click="kanbanStore.fetchProjects" />
+            <q-btn flat color="secondary" icon="help" label="Tutorial" @click="showTutorial = true" />
+          </div>
+        </q-card-section>
+      </q-card>
 
-      <div v-if="kanbanStore.projects.length > 0" class="kanban-board">
-        <KanbanColumn
-          title="Requerimientos"
-          statusId="requerimientos"
-          :tasks="kanbanStore.tasksByStatus.requerimientos"
-        />
-        <KanbanColumn title="Por Hacer" statusId="todo" :tasks="kanbanStore.tasksByStatus.todo" />
-        <KanbanColumn
-          title="En Progreso"
-          statusId="in-progress"
-          :tasks="kanbanStore.tasksByStatus['in-progress']"
-        />
-        <KanbanColumn
-          title="Testing"
-          statusId="testing"
-          :tasks="kanbanStore.tasksByStatus.testing"
-        />
-        <KanbanColumn title="Hecho" statusId="done" :tasks="kanbanStore.tasksByStatus.done" />
+      <div v-if="kanbanStore.projects.length > 0" class="kanban-board row q-col-gutter-md">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <KanbanColumn title="Requerimientos" statusId="requerimientos" :tasks="kanbanStore.tasksByStatus.requerimientos" />
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <KanbanColumn title="Por Hacer" statusId="todo" :tasks="kanbanStore.tasksByStatus.todo" />
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <KanbanColumn title="En Progreso" statusId="in-progress" :tasks="kanbanStore.tasksByStatus['in-progress']" />
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <KanbanColumn title="Testing" statusId="testing" :tasks="kanbanStore.tasksByStatus.testing" />
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <KanbanColumn title="Hecho" statusId="done" :tasks="kanbanStore.tasksByStatus.done" />
+        </div>
       </div>
       <div v-else class="no-projects">
         <h2>Bienvenido a tu Tablero Kanban</h2>
-        <p>Parece que no tienes ningún proyecto. ¡Crea uno para empezar a organizar tus tareasss!</p>
+        <p>Parece que no tienes ningún proyecto. ¡Crea uno para empezar a organizar tus tareas!</p>
       </div>
       <TaskModal />
       <TutorialModal v-if="showTutorial" @close="showTutorial = false" />
@@ -43,11 +41,12 @@
     <div v-else class="no-projects">
       <h2>Tablero Kanban</h2>
       <p>Por favor, inicia sesión para ver tus proyectos.</p>
-      <div style="margin-top:12px">
-        <button class="btn" @click="kanbanStore.forceMockProjects">Mostrar mock de proyectos</button>
+      <div class="q-mt-sm">
+        <q-btn color="primary" label="Mostrar mock de proyectos" @click="kanbanStore.forceMockProjects" />
       </div>
     </div>
   </div>
+
 </template>
 
 <script setup>
@@ -88,15 +87,10 @@ watch(
   flex-direction: column;
   flex-grow: 1;
   overflow: hidden;
-  padding: 40px;
+  padding: 24px;
 }
 
-.kanban-board {
-  display: flex;
-  gap: 20px;
-  flex-grow: 1;
-  padding: 20px 0;
-}
+.kanban-board { flex-grow: 1; }
 
 .no-projects {
   text-align: center;
@@ -111,4 +105,6 @@ watch(
     justify-content: flex-start;
   }
 }
+
+.glass-card { background: rgba(255,255,255,0.06); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); }
 </style>
