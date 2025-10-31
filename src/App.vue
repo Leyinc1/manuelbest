@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf" class="app-layout">
+  <q-layout view="hHh lpR fFf" class="app-layout" :class="[{ 'reduce-effects': reduceEffects }, { 'paused-anim': pausedAnim }]">
     <!-- Decorative animated background -->
     <div class="bg-decor">
       <div class="blob b1"></div>
@@ -13,7 +13,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above side="left" bordered>
+    <q-drawer v-model="leftDrawerOpen" show-if-above side="left" bordered :width="280">
       <!-- Reuse existing Sidebar content inside the drawer -->
       <Sidebar />
     </q-drawer>
@@ -37,9 +37,26 @@ import { useAuthStore } from './stores/authStore'
 
 const authStore = useAuthStore()
 const leftDrawerOpen = ref(true)
+const reduceEffects = ref(false)
+const pausedAnim = ref(false)
 
 onMounted(() => {
   authStore.tryAutoLogin()
+
+  // Detect low-power or user preference and reduce heavy effects
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+  const decideReduce = () => {
+    const lowThreads = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+    const lowMem = (navigator.deviceMemory && navigator.deviceMemory <= 4)
+    reduceEffects.value = mq.matches || lowThreads || lowMem
+  }
+  decideReduce()
+  mq.addEventListener?.('change', decideReduce)
+
+  // Pause animations when tab is not visible to avoid background GPU/CPU usage
+  const updatePaused = () => { pausedAnim.value = document.hidden }
+  document.addEventListener('visibilitychange', updatePaused)
+  updatePaused()
 })
 </script>
 
@@ -91,27 +108,27 @@ hr {
 /* --- Decorative Background Layers --- */
 .app-layout { position: relative; overflow: hidden; }
 .bg-decor { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.bg-decor .blob { position: absolute; filter: blur(50px); opacity: 0.6; mix-blend-mode: screen; }
+.bg-decor .blob { position: absolute; filter: blur(24px); opacity: 0.5; mix-blend-mode: screen; will-change: transform; transform: translateZ(0); }
 .bg-decor .b1 { width: 40vw; height: 40vw; top: -10vw; left: -10vw; background: radial-gradient(circle, rgba(124,77,255,0.6), transparent 60%); animation: float1 18s ease-in-out infinite alternate; }
 .bg-decor .b2 { width: 35vw; height: 35vw; bottom: -10vw; right: -10vw; background: radial-gradient(circle, rgba(217,70,239,0.5), transparent 60%); animation: float2 22s ease-in-out infinite alternate; }
 .bg-decor .grid-overlay { position: absolute; inset: 0; background:
-  radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0) 0 0/24px 24px; opacity: 0.4; }
+  radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0) 0 0/26px 26px; opacity: 0.3; }
 
 @keyframes float1 { from { transform: translateY(0) } to { transform: translateY(30px) } }
 @keyframes float2 { from { transform: translateY(0) } to { transform: translateY(-30px) } }
 
 /* --- Header Gradient --- */
-.header-gradient { background: linear-gradient(90deg, #7C4DFF, #D946EF, #22D3EE); background-size: 200% 200%; animation: hueShift 16s ease infinite; }
+.header-gradient { background: linear-gradient(90deg, #7C4DFF, #D946EF, #22D3EE); background-size: 200% 200%; animation: hueShift 18s ease infinite; will-change: background-position; }
 @keyframes hueShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
 /* --- BARRA LATERAL --- */
 .sidebar {
-  width: 320px;
+  width: 100%;
   background-color: var(--bg-dark);
   color: var(--text-light);
-  padding: 40px 20px;
-  position: fixed;
-  height: 100%;
+  padding: 24px 16px;
+  position: relative;
+  height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -193,11 +210,11 @@ hr {
   background: var(--card-bg);
   padding: 30px;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   margin-bottom: 30px;
   border: 1px solid var(--border-color);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   /* Por defecto, las tarjetas están ocultas */
   display: none;
@@ -255,7 +272,7 @@ hr {
 }
 
 /* --- Page transition --- */
-.fade-slide-enter-active, .fade-slide-leave-active { transition: all .35s ease; }
+.fade-slide-enter-active, .fade-slide-leave-active { transition: all .28s ease; will-change: transform, opacity; }
 .fade-slide-enter-from { opacity: 0; transform: translateY(8px); }
 .fade-slide-leave-to   { opacity: 0; transform: translateY(-8px); }
 
@@ -286,10 +303,10 @@ hr {
   }
 
   .sidebar {
-    position: static; /* La barra deja de estar fija */
+    position: static; /* dentro del drawer, no fija */
     width: 100%;
     height: auto;
-    padding: 20px;
+    padding: 16px;
     /* IMPORTANTE: Centra el texto y el contenido cuando está apilado */
     justify-content: center;
     align-items: center;
@@ -342,6 +359,21 @@ hr {
     font-size: 1em; /* Ajusta tamaño del título */
   }
 }
+
+/* Reduce motion for users who prefer it and to improve perf on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  .bg-decor .blob { animation: none !important; }
+  .header-gradient { animation: none !important; }
+  .fade-slide-enter-active, .fade-slide-leave-active { transition: none !important; }
+}
+
+/* App-level performance modes */
+.reduce-effects .bg-decor .blob { display: none; }
+.reduce-effects .grid-overlay { opacity: 0.15; }
+.reduce-effects .header-gradient { animation: none !important; }
+.reduce-effects .view-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(255,255,255,0.06); box-shadow: 0 6px 16px rgba(0,0,0,0.18); }
+.paused-anim .bg-decor .blob { animation: none !important; }
+.paused-anim .header-gradient { animation: none !important; }
 
 .main-content {
   flex-grow: 1;

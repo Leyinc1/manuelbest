@@ -52,6 +52,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   const tasks = ref([])
   const currentProjectId = ref(null)
   let pollingIntervalId = null
+  let visibilityHandlerRegistered = false
   const isModalOpen = ref(false)
   const isEditing = ref(false)
   const editingTask = ref(null)
@@ -154,6 +155,7 @@ export const useKanbanStore = defineStore('kanban', () => {
       tasks.value = []
       currentProjectId.value = null
     }
+    setupVisibilityPause()
     startPolling()
   }
 
@@ -263,6 +265,7 @@ export const useKanbanStore = defineStore('kanban', () => {
   function startPolling() {
     stopPolling()
     pollingIntervalId = setInterval(() => {
+      if (document.hidden) return
       if (currentProjectId.value && useAuthStore().user?.value) {
         fetchTasks()
       }
@@ -271,6 +274,18 @@ export const useKanbanStore = defineStore('kanban', () => {
 
   function stopPolling() {
     if (pollingIntervalId) clearInterval(pollingIntervalId)
+  }
+
+  function setupVisibilityPause() {
+    if (visibilityHandlerRegistered) return
+    visibilityHandlerRegistered = true
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopPolling()
+      } else {
+        if (currentProjectId.value && useAuthStore().user?.value) startPolling()
+      }
+    })
   }
 
   async function updateTaskStatus(taskId, newStatus) {
@@ -313,5 +328,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     deleteProject,
     shareProject,
     updateTaskStatus,
+    // internal helpers (not used outside, kept for reference)
+    // setupVisibilityPause
   }
 })

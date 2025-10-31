@@ -1,11 +1,11 @@
 <template>
   <aside class="sidebar">
     <div class="sidebar-content">
-      <q-img :src="photoSrc" alt="Foto de Manuel Ipenza Negri" class="profile-pic" ratio="1" fit="cover" loading="lazy" spinner-color="primary">
+      <q-img :src="photoSrc" alt="Foto de Manuel Ipenza Negri" class="profile-pic" ratio="1" fit="cover" loading="lazy" decoding="async" spinner-color="primary">
         <template #error>
           <div class="profile-fallback">
             <q-avatar size="120px" color="primary" text-color="white" icon="person" />
-            <div class="text-caption q-mt-sm">Sube tu foto como <code>/public/yo.jpeg</code></div>
+            <div class="text-caption q-mt-sm">Coloca tu foto en <code>src/assets/yo.jpeg</code></div>
           </div>
         </template>
       </q-img>
@@ -53,10 +53,10 @@
 <script setup>
 import UserStatus from './UserStatus.vue'
 import { computed } from 'vue'
+import profileImg from '@/assets/yo.jpeg'
 
-// Foto desde carpeta public para que funcione en dev y build sin importar el asset
-// Coloca tu imagen en `public/yo.jpeg` (raíz del proyecto)
-const photoSrc = computed(() => '/yo.jpeg')
+// Usamos la imagen desde assets para que Vite la procese correctamente
+const photoSrc = computed(() => profileImg)
 </script>
 
 <style scoped>
