@@ -6,9 +6,10 @@ import { createPinia, setActivePinia } from 'pinia';
 // Mock the authStore
 const mockAuthStore = {
   user: null, // Default state: no user
-  login: vi.fn(),
+  get isAuthenticated() {
+    return !!this.user;
+  },
   logout: vi.fn(),
-  signup: vi.fn(),
 };
 
 // Mock the useAuthStore function
@@ -24,41 +25,40 @@ describe('UserStatus.vue', () => {
     vi.clearAllMocks(); // Clear any mock calls
   });
 
-  it('renders login/signup buttons when no user is logged in', () => {
-    const wrapper = mount(UserStatus);
+  function mountWithStubs() {
+    return mount(UserStatus, {
+      global: {
+        stubs: {
+          // Stub RouterLink to avoid needing a real router in unit tests
+          RouterLink: {
+            template: '<a data-test="router-link"><slot /></a>'
+          }
+        }
+      }
+    });
+  }
 
+  it('renders a login RouterLink when no user is logged in', () => {
+    const wrapper = mountWithStubs();
     expect(wrapper.find('.login-actions').exists()).toBe(true);
-    expect(wrapper.find('button').text()).toContain('Iniciar Sesión');
-    expect(wrapper.findAll('button').at(1).text()).toContain('Registrarse');
+    const link = wrapper.find('[data-test="router-link"]');
+    expect(link.exists()).toBe(true);
+    expect(link.text()).toMatch(/Iniciar Sesión/i);
     expect(wrapper.find('.user-info').exists()).toBe(false);
   });
 
   it('renders user info when a user is logged in', async () => {
     mockAuthStore.user = { email: 'test@example.com' }; // Set user for this test
-
-    const wrapper = mount(UserStatus);
-
+    const wrapper = mountWithStubs();
     expect(wrapper.find('.user-info').exists()).toBe(true);
     expect(wrapper.find('span').text()).toContain('Bienvenido, test@example.com');
     expect(wrapper.find('button').text()).toContain('Cerrar Sesión');
     expect(wrapper.find('.login-actions').exists()).toBe(false);
   });
 
-  it('calls authStore.login when "Iniciar Sesión" button is clicked', async () => {
-    const wrapper = mount(UserStatus);
-    await wrapper.find('button.btn-primary').trigger('click');
-    expect(mockAuthStore.login).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls authStore.signup when "Registrarse" button is clicked', async () => {
-    const wrapper = mount(UserStatus);
-    await wrapper.find('button.btn-secondary').trigger('click'); // Corrected selector
-    expect(mockAuthStore.signup).toHaveBeenCalledTimes(1);
-  });
-
   it('calls authStore.logout when "Cerrar Sesión" button is clicked', async () => {
     mockAuthStore.user = { email: 'test@example.com' }; // User must be logged in to see logout button
-    const wrapper = mount(UserStatus);
+    const wrapper = mountWithStubs();
     await wrapper.find('button.btn-secondary').trigger('click');
     expect(mockAuthStore.logout).toHaveBeenCalledTimes(1);
   });

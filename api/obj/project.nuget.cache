@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "onGqanONSJA=",
+  "dgSpecHash": "QkvPUFevDtA=",
   "success": true,
-  "projectFilePath": "c:\\Users\\PC\\Documents\\New Manuel.Best\\manuelbest\\api\\ManuelBestApi.csproj",
+  "projectFilePath": "C:\\Users\\PC\\Documents\\New Manuel.Best\\manuelbest\\api\\ManuelBestApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\PC\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

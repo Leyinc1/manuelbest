@@ -44,7 +44,7 @@
       <div class="contact-info">
         <h2>Contacto</h2>
         <p><a href="mailto:manuelipenza@manuel.best">manuelipenza@manuel.best</a></p>
-        <p><a href="https://github.com/Leyinc1" target="_blank">GitHub | Leyinc1</a></p>
+        <p><a href="https://github.com/Leyinc1" target="_blank" rel="noopener noreferrer">GitHub | Leyinc1</a></p>
       </div>
     </div>
   </aside>
